@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Petroil CasaControl</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-mark">PC</div>
+        <div>
+          <strong>Petroil</strong>
+          <span>CasaControl</span>
+        </div>
+      </div>
+
+      <nav class="nav-list">
+        <button class="nav-item active" data-view="inicio"><span>⌂</span> Inicio</button>
+        <button class="nav-item" data-view="calendario"><span>□</span> Calendario</button>
+        <button class="nav-item" data-view="programacion"><span>✓</span> Programación semanal</button>
+        <button class="nav-item" data-view="solicitudes"><span>₿</span> Solicitudes de fondos</button>
+        <button class="nav-item" data-view="limpieza"><span>✦</span> Limpieza externa</button>
+        <button class="nav-item" data-view="aprobaciones"><span>◎</span> Aprobaciones</button>
+        <button class="nav-item" data-view="reportes"><span>▥</span> Reportes</button>
+        <button class="nav-item" data-view="sucursales"><span>⌂</span> Sucursales</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-card">
+          <div class="avatar">KM</div>
+          <div><strong>Kevin Martínez</strong><span>Responsable de pagos</span></div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button class="menu-toggle" id="menuToggle">☰</button>
+        <div class="search-box"><span>⌕</span><input id="globalSearch" placeholder="Buscar sucursal, servicio o proveedor..." /></div>
+        <div class="top-actions">
+          <button class="icon-btn" id="notificationBtn">🔔<span class="notification-dot"></span></button>
+          <button class="primary-btn" id="newPaymentBtn">+ Nuevo pago</button>
+        </div>
+      </header>
+
+      <section class="view active" id="inicio">
+        <div class="page-heading">
+          <div><p class="eyebrow">CENTRO DE TRABAJO</p><h1>Buenos días, Kevin</h1><p>Esto es lo que necesita tu atención hoy.</p></div>
+          <div class="date-pill">Semana 29 · 20–26 julio</div>
+        </div>
+
+        <div class="kpi-grid">
+          <article class="kpi-card blue"><div class="kpi-icon">$</div><div><span>Por pagar esta semana</span><strong>$184,620</strong><small>18 obligaciones</small></div></article>
+          <article class="kpi-card orange"><div class="kpi-icon">!</div><div><span>Próximos a vencer</span><strong>7</strong><small>Dentro de 3 días</small></div></article>
+          <article class="kpi-card red"><div class="kpi-icon">×</div><div><span>Vencidos</span><strong>2</strong><small>Requieren atención</small></div></article>
+          <article class="kpi-card green"><div class="kpi-icon">✓</div><div><span>Presupuesto disponible</span><strong>$426,300</strong><small>68% disponible</small></div></article>
+        </div>
+
+        <div class="content-grid two-thirds">
+          <article class="panel">
+            <div class="panel-header"><div><h2>Necesita tu atención</h2><p>Prioridades ordenadas por urgencia</p></div><button class="link-btn">Ver todas</button></div>
+            <div class="attention-list" id="attentionList">
+              <button class="attention-item critical" data-action="open-payment"><span class="status-icon">!</span><div><strong>CFE · Sucursal Chihuahua</strong><p>Vence en 3 días · Importe $42,650</p></div><span class="tag">Crítica</span><span>›</span></button>
+              <button class="attention-item warning" data-action="open-anomaly"><span class="status-icon">↗</span><div><strong>Internet · Sucursal Juárez</strong><p>El importe aumentó 22% contra el promedio</p></div><span class="tag">Variación</span><span>›</span></button>
+              <button class="attention-item info" data-action="open-proof"><span class="status-icon">▣</span><div><strong>Limpieza · Sucursal Delicias</strong><p>El comprobante fue rechazado por el gerente</p></div><span class="tag">Corrección</span><span>›</span></button>
+              <button class="attention-item success" data-action="go-programacion"><span class="status-icon">✓</span><div><strong>4 pagos listos para solicitud</strong><p>Total preparado: $76,430</p></div><span class="tag">Listo</span><span>›</span></button>
+            </div>
+          </article>
+
+          <article class="panel budget-panel">
+            <div class="panel-header"><div><h2>Presupuesto mensual</h2><p>Julio 2026</p></div><span class="percent-badge">68%</span></div>
+            <div class="donut-wrap"><div class="donut"><div><strong>$426 mil</strong><span>Disponible</span></div></div></div>
+            <div class="budget-stats"><div><span>Asignado</span><strong>$1,325,000</strong></div><div><span>Ejercido</span><strong>$898,700</strong></div><div><span>Proyectado</span><strong>$1,247,900</strong></div></div>
+          </article>
+        </div>
+
+        <div class="content-grid half">
+          <article class="panel">
+            <div class="panel-header"><div><h2>Próximos vencimientos</h2><p>Siguientes 7 días</p></div><button class="link-btn" data-go="calendario">Abrir calendario</button></div>
+            <div class="mini-timeline">
+              <div><span class="day">HOY</span><i></i><div><strong>Internet · Juárez</strong><small>$8,920 · Recibo pendiente</small></div></div>
+              <div><span class="day">22 JUL</span><i></i><div><strong>CFE · Chihuahua</strong><small>$42,650 · Pendiente de solicitud</small></div></div>
+              <div><span class="day">23 JUL</span><i></i><div><strong>Agua · Parral</strong><small>$5,480 · Aprobación pendiente</small></div></div>
+              <div><span class="day">25 JUL</span><i></i><div><strong>Limpieza · 6 sucursales</strong><small>$31,200 · Programación semanal</small></div></div>
+            </div>
+          </article>
+          <article class="panel">
+            <div class="panel-header"><div><h2>Gasto por servicio</h2><p>Comparativo mensual</p></div><select><option>Julio 2026</option></select></div>
+            <div class="bar-chart">
+              <div><span>CFE</span><div><i style="width:82%"></i></div><strong>$348k</strong></div>
+              <div><span>Limpieza</span><div><i style="width:58%"></i></div><strong>$244k</strong></div>
+              <div><span>Internet</span><div><i style="width:37%"></i></div><strong>$156k</strong></div>
+              <div><span>Agua</span><div><i style="width:24%"></i></div><strong>$101k</strong></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="view" id="calendario">
+        <div class="page-heading"><div><p class="eyebrow">PLANEACIÓN</p><h1>Calendario operativo</h1><p>Vencimientos, pagos y comprobaciones en una sola vista.</p></div><button class="primary-btn">+ Agregar obligación</button></div>
+        <div class="panel calendar-panel">
+          <div class="calendar-toolbar"><div class="month-nav"><button>‹</button><h2>Julio 2026</h2><button>›</button></div><div class="filter-row"><select><option>Todas las sucursales</option><option>Chihuahua</option><option>Juárez</option></select><select><option>Todos los servicios</option><option>CFE</option><option>Agua</option></select><button class="secondary-btn">Semana</button><button class="primary-btn small">Mes</button></div></div>
+          <div class="calendar-grid" id="calendarGrid"></div>
+        </div>
+      </section>
+
+      <section class="view" id="programacion">
+        <div class="page-heading"><div><p class="eyebrow">CICLO SEMANAL</p><h1>Programación semanal</h1><p>Confirma, corrige y agrupa pagos antes de solicitar fondos.</p></div><button class="primary-btn" id="generateRequestBtn">Generar solicitud</button></div>
+        <div class="summary-strip"><div><span>Pagos seleccionados</span><strong id="selectedCount">4</strong></div><div><span>Total seleccionado</span><strong id="selectedTotal">$76,430</strong></div><div><span>Vencen esta semana</span><strong>7</strong></div><div><span>Con variación</span><strong>2</strong></div></div>
+        <div class="panel table-panel"><div class="table-toolbar"><div class="filter-row"><button class="filter-chip active">Todos</button><button class="filter-chip">Listos</button><button class="filter-chip">Falta recibo</button><button class="filter-chip">Con variación</button></div><button class="secondary-btn">Importar Excel</button></div><div class="table-wrap"><table><thead><tr><th></th><th>Servicio / sucursal</th><th>Vencimiento</th><th>Importe</th><th>Variación</th><th>Estado</th><th></th></tr></thead><tbody id="paymentsTable"></tbody></table></div></div>
+      </section>
+
+      <section class="view" id="solicitudes">
+        <div class="page-heading"><div><p class="eyebrow">FONDOS</p><h1>Solicitudes de fondos</h1><p>Seguimiento de solicitudes, autorizaciones y origen de recursos.</p></div><button class="primary-btn">+ Nueva solicitud</button></div>
+        <div class="kpi-grid compact"><article class="metric"><span>Pendientes</span><strong>6</strong><small>$214,890</small></article><article class="metric"><span>En aprobación</span><strong>3</strong><small>$96,340</small></article><article class="metric"><span>Autorizadas</span><strong>8</strong><small>$341,200</small></article><article class="metric"><span>Rechazadas</span><strong>1</strong><small>$12,850</small></article></div>
+        <div class="panel table-panel"><div class="table-wrap"><table><thead><tr><th>Folio</th><th>Fecha</th><th>Conceptos</th><th>Sucursales</th><th>Total</th><th>Estado</th><th></th></tr></thead><tbody><tr><td><strong>SF-2026-0184</strong></td><td>20 jul 2026</td><td>4 pagos</td><td>Chihuahua, Juárez</td><td><strong>$76,430</strong></td><td><span class="status waiting">En revisión</span></td><td><button class="more-btn">•••</button></td></tr><tr><td><strong>SF-2026-0183</strong></td><td>18 jul 2026</td><td>7 pagos</td><td>6 sucursales</td><td><strong>$128,640</strong></td><td><span class="status approved">Autorizada</span></td><td><button class="more-btn">•••</button></td></tr><tr><td><strong>SF-2026-0182</strong></td><td>17 jul 2026</td><td>2 pagos</td><td>Parral</td><td><strong>$19,820</strong></td><td><span class="status rejected">Corrección</span></td><td><button class="more-btn">•••</button></td></tr></tbody></table></div></div>
+      </section>
+
+      <section class="view" id="limpieza">
+        <div class="page-heading"><div><p class="eyebrow">SERVICIO RECURRENTE</p><h1>Limpieza externa</h1><p>Confirma días trabajados y calcula automáticamente el importe.</p></div><button class="primary-btn">Configurar plan</button></div>
+        <div class="content-grid two-thirds"><article class="panel"><div class="panel-header"><div><h2>Registro semanal</h2><p>Sucursal Chihuahua · 20–26 julio</p></div><span class="status waiting">Pendiente de confirmar</span></div><div class="week-checks" id="weekChecks"></div><div class="form-grid"><label>Días adicionales<input type="number" id="extraDays" value="0" min="0"></label><label>Descuentos autorizados<input type="number" id="discount" value="0" min="0"></label><label class="full">Observaciones<textarea placeholder="Agrega una nota..."></textarea></label></div></article><article class="panel calculator-card"><h2>Cálculo de pago</h2><div class="calc-line"><span>Días trabajados</span><strong id="workedDays">5</strong></div><div class="calc-line"><span>Tarifa diaria</span><strong>$650</strong></div><div class="calc-line"><span>Días adicionales</span><strong id="extraAmount">$0</strong></div><div class="calc-line"><span>Descuentos</span><strong id="discountAmount">-$0</strong></div><div class="calc-total"><span>Total a solicitar</span><strong id="cleaningTotal">$3,250</strong></div><button class="primary-btn full-width">Confirmar semana</button></article></div>
+      </section>
+
+      <section class="view" id="aprobaciones">
+        <div class="page-heading"><div><p class="eyebrow">AUTORIZACIONES</p><h1>Aprobaciones</h1><p>Decisiones rápidas con contexto financiero y operativo.</p></div></div>
+        <div class="approval-layout"><div class="approval-list"><button class="approval-card active"><div><strong>SF-2026-0184</strong><span>Vence hoy</span></div><h3>Servicios de 2 sucursales</h3><p>4 pagos · Chihuahua y Juárez</p><strong class="amount">$76,430</strong></button><button class="approval-card"><div><strong>SF-2026-0185</strong><span>Vence mañana</span></div><h3>Limpieza semanal</h3><p>6 sucursales</p><strong class="amount">$31,200</strong></button></div><article class="panel approval-detail"><div class="panel-header"><div><h2>Solicitud SF-2026-0184</h2><p>Preparada por Kevin Martínez</p></div><span class="status waiting">En revisión</span></div><div class="detail-grid"><div><span>Importe solicitado</span><strong>$76,430</strong></div><div><span>Presupuesto disponible</span><strong>$426,300</strong></div><div><span>Fecha límite</span><strong>22 jul 2026</strong></div><div><span>Riesgo</span><strong class="orange-text">Recargo por atraso</strong></div></div><h3>Pagos incluidos</h3><div class="included-payment"><div><strong>CFE · Chihuahua</strong><span>Vence 22 jul</span></div><strong>$42,650</strong></div><div class="included-payment"><div><strong>Internet · Juárez</strong><span>Variación +22%</span></div><strong>$8,920</strong></div><div class="included-payment"><div><strong>Limpieza · 2 sucursales</strong><span>10 días confirmados</span></div><strong>$24,860</strong></div><label>Comentario<textarea placeholder="Agrega una observación para el solicitante..."></textarea></label><div class="approval-actions"><button class="danger-btn">Rechazar</button><button class="secondary-btn">Solicitar corrección</button><button class="primary-btn" id="approveBtn">Aprobar solicitud</button></div></article></div>
+      </section>
+
+      <section class="view" id="reportes">
+        <div class="page-heading"><div><p class="eyebrow">ANÁLISIS</p><h1>Reportes e indicadores</h1><p>Información administrativa convertida en decisiones de ahorro.</p></div><button class="secondary-btn">Exportar Excel</button></div>
+        <div class="kpi-grid compact"><article class="metric"><span>Gasto mensual</span><strong>$898,700</strong><small>+4.8% vs junio</small></article><article class="metric"><span>Recargos evitados</span><strong>$18,450</strong><small>12 alertas atendidas</small></article><article class="metric"><span>Expedientes completos</span><strong>96%</strong><small>Meta 100%</small></article><article class="metric"><span>Tiempo de aprobación</span><strong>7.4 h</strong><small>-31% vs mes anterior</small></article></div>
+        <div class="content-grid half"><article class="panel"><div class="panel-header"><div><h2>Gasto mensual</h2><p>Enero–julio 2026</p></div></div><div class="line-chart"><svg viewBox="0 0 700 250" preserveAspectRatio="none"><polyline points="0,210 110,170 220,180 330,120 440,135 550,80 700,52" fill="none" stroke="#1261a6" stroke-width="5"/><polyline points="0,230 110,205 220,195 330,165 440,140 550,115 700,90" fill="none" stroke="#ff7a21" stroke-width="4" stroke-dasharray="10 8"/></svg><div class="axis-labels"><span>Ene</span><span>Feb</span><span>Mar</span><span>Abr</span><span>May</span><span>Jun</span><span>Jul</span></div></div></article><article class="panel"><div class="panel-header"><div><h2>Sucursales con mayor variación</h2><p>Contra promedio de 3 meses</p></div></div><div class="ranking"><div><span>1</span><div><strong>Juárez</strong><small>Internet y CFE</small></div><b>+22%</b></div><div><span>2</span><div><strong>Parral</strong><small>Agua</small></div><b>+17%</b></div><div><span>3</span><div><strong>Delicias</strong><small>Limpieza</small></div><b>+12%</b></div></div></article></div>
+      </section>
+
+      <section class="view" id="sucursales">
+        <div class="page-heading"><div><p class="eyebrow">CATÁLOGOS</p><h1>Sucursales y casas</h1><p>Expediente maestro de servicios, responsables y presupuesto.</p></div><button class="primary-btn">+ Nueva sucursal</button></div>
+        <div class="branch-grid"><article class="branch-card"><div class="branch-top"><div class="branch-icon">CH</div><span class="status approved">Activa</span></div><h3>Sucursal Chihuahua</h3><p>Región Norte · Centro de costo CC-104</p><div class="branch-stats"><div><span>Servicios</span><strong>8</strong></div><div><span>Presupuesto</span><strong>$165k</strong></div><div><span>Responsable</span><strong>Laura M.</strong></div></div><button class="secondary-btn full-width">Ver expediente</button></article><article class="branch-card"><div class="branch-top"><div class="branch-icon">JR</div><span class="status approved">Activa</span></div><h3>Sucursal Juárez</h3><p>Región Norte · Centro de costo CC-105</p><div class="branch-stats"><div><span>Servicios</span><strong>7</strong></div><div><span>Presupuesto</span><strong>$148k</strong></div><div><span>Responsable</span><strong>Daniel R.</strong></div></div><button class="secondary-btn full-width">Ver expediente</button></article><article class="branch-card"><div class="branch-top"><div class="branch-icon">PA</div><span class="status approved">Activa</span></div><h3>Sucursal Parral</h3><p>Región Centro · Centro de costo CC-109</p><div class="branch-stats"><div><span>Servicios</span><strong>6</strong></div><div><span>Presupuesto</span><strong>$119k</strong></div><div><span>Responsable</span><strong>María T.</strong></div></div><button class="secondary-btn full-width">Ver expediente</button></article></div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal">
+      <button class="modal-close" id="modalClose">×</button>
+      <div class="modal-icon">$</div>
+      <h2 id="modalTitle">Registrar nuevo pago</h2>
+      <p id="modalSubtitle">Captura una obligación extraordinaria o registra un recibo.</p>
+      <form id="paymentForm" class="form-grid">
+        <label>Servicio<select required><option value="">Selecciona...</option><option>CFE</option><option>Agua</option><option>Internet</option><option>Limpieza</option></select></label>
+        <label>Sucursal<select required><option value="">Selecciona...</option><option>Chihuahua</option><option>Juárez</option><option>Parral</option></select></label>
+        <label>Importe<input type="number" placeholder="$0.00" required></label>
+        <label>Fecha límite<input type="date" required></label>
+        <label class="full">Concepto<input type="text" placeholder="Describe el pago"></label>
+        <div class="modal-actions full"><button type="button" class="secondary-btn" id="cancelModal">Cancelar</button><button type="submit" class="primary-btn">Guardar pago</button></div>
+      </form>
+    </div>
+  </div>
+  <div class="toast" id="toast">Acción realizada correctamente</div>
+  <script src="app.js"></script>
+</body>
+</html>
