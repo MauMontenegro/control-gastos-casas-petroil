@@ -1,4 +1,4 @@
-PROTOTIPO FUNCIONAL - PETROIL CASACONTROL
+PROTOTIPO FUNCIONAL - AGENDA DE GASTOS PETROIL
 
 1. Descomprime la carpeta.
 2. Abre index.html en Google Chrome, Microsoft Edge o Firefox.

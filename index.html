@@ -3,57 +3,139 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Petroil CasaControl</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <title>Agenda de Gastos | Petroil</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="enterprise.css" />
+  <link rel="stylesheet" href="layout-final.css" />
 </head>
 <body>
+  <a class="skip-link" href="#contenidoPrincipal">Saltar al contenido principal</a>
+  <section class="login-screen" id="loginScreen" aria-labelledby="loginTitle">
+    <div class="login-visual" aria-hidden="true">
+      <div class="login-brand">
+        <img class="petroil-logo login-logo" src="assets/petroil-logo-white.png" alt="Petroil Distribución de Combustibles">
+        <span class="product-name">Agenda de Gastos</span>
+      </div>
+      <div class="login-message">
+        <span class="login-kicker">CONTROL OPERATIVO</span>
+        <h1>Todo bajo control,<br>desde un solo lugar.</h1>
+        <p>Administra pagos, vencimientos y solicitudes con información clara y oportuna.</p>
+      </div>
+      <div class="login-feature-row">
+        <span>Pagos</span><i></i><span>Calendario</span><i></i><span>Comprobaciones</span>
+      </div>
+    </div>
+    <div class="login-form-side">
+      <form class="login-card" id="loginForm" novalidate>
+        <div class="login-mobile-brand">
+          <img class="petroil-logo login-logo-mobile" src="assets/petroil-logo-white.png" alt="Petroil Distribución de Combustibles">
+          <span class="product-name">Agenda de Gastos</span>
+        </div>
+        <span class="login-welcome">BIENVENIDO</span>
+        <h2 id="loginTitle">Inicia sesión</h2>
+        <p>Ingresa tus datos para acceder al centro de trabajo.</p>
+        <label class="login-field">
+          <span>Correo electrónico</span>
+          <span class="login-input-wrap">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6h16v12H4V6Z" stroke="currentColor" stroke-width="1.7"/><path d="m5 7 7 6 7-6" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+            <input id="loginEmail" type="email" autocomplete="username" placeholder="nombre@petroil.com" required>
+          </span>
+          <small class="field-error" id="emailError"></small>
+        </label>
+        <label class="login-field">
+          <span>Contraseña</span>
+          <span class="login-input-wrap">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="1.7"/></svg>
+            <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Ingresa tu contraseña" required minlength="4">
+            <button class="password-toggle" id="passwordToggle" type="button" aria-label="Mostrar contraseña">Ver</button>
+          </span>
+          <small class="field-error" id="passwordError"></small>
+        </label>
+        <div class="login-options">
+          <label class="remember-check"><input id="rememberSession" type="checkbox"><span></span>Recordarme</label>
+          <button class="forgot-link" id="forgotPassword" type="button">¿Olvidaste tu contraseña?</button>
+        </div>
+        <button class="login-submit" type="submit"><span>Entrar a Agenda de Gastos</span><b aria-hidden="true">→</b></button>
+        <div class="demo-access">
+          <span>ACCESO DE DEMOSTRACIÓN</span>
+          <button id="demoAccess" type="button"><strong>Usar cuenta de Kevin</strong><small>kevin@petroil.com · 1234</small></button>
+        </div>
+        <p class="login-help">¿Necesitas ayuda? Contacta al administrador del sistema.</p>
+      </form>
+    </div>
+  </section>
   <div class="app-shell">
     <aside class="sidebar" id="sidebar">
-      <div class="brand">
-        <div class="brand-mark">PC</div>
-        <div>
-          <strong>Petroil</strong>
-          <span>CasaControl</span>
+      <div class="header-main-row">
+        <div class="brand">
+          <img class="petroil-logo sidebar-logo" src="assets/petroil-logo-white.png" alt="Petroil Distribución de Combustibles">
+          <span class="product-name">Agenda de Gastos</span>
+        </div>
+
+        <header class="topbar">
+          <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+          <div class="search-box"><span class="search-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="5.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span><label class="sr-only" for="globalSearch">Buscar en Agenda de Gastos</label><input id="globalSearch" type="search" autocomplete="off" placeholder="Buscar..." /></div>
+          <div class="top-actions">
+            <button class="icon-btn" id="notificationBtn" aria-label="Notificaciones">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M8 17h8M8 17V10a4 4 0 1 1 8 0v7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 19a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              <span class="notification-dot"></span>
+            </button>
+          </div>
+        </header>
+
+        <div class="sidebar-footer">
+          <button class="user-card" id="logoutBtn" type="button" title="Cerrar sesión">
+            <div class="avatar"><span aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.8"/><path d="M5.5 19c.7-3.5 3-5.3 6.5-5.3s5.8 1.8 6.5 5.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+            <div class="user-copy"><strong>Kevin</strong></div>
+            <span class="user-action" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M10 5H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4M14 8l4 4-4 4M9 12h9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </button>
         </div>
       </div>
 
       <nav class="nav-list">
-        <button class="nav-item active" data-view="inicio"><span>⌂</span> Inicio</button>
-        <button class="nav-item" data-view="calendario"><span>□</span> Calendario</button>
-        <button class="nav-item" data-view="programacion"><span>✓</span> Programación semanal</button>
-        <button class="nav-item" data-view="solicitudes"><span>₿</span> Solicitudes de fondos</button>
-        <button class="nav-item" data-view="limpieza"><span>✦</span> Limpieza externa</button>
-        <button class="nav-item" data-view="aprobaciones"><span>◎</span> Aprobaciones</button>
-        <button class="nav-item" data-view="reportes"><span>▥</span> Reportes</button>
-        <button class="nav-item" data-view="sucursales"><span>⌂</span> Sucursales</button>
+        <button class="nav-item active" data-view="solicitudes"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M6 4h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-4 3V6a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 9h8M8 13h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span> Solicitudes</button>
+        <button class="nav-item" data-view="programacion"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M6 5h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.8"/><path d="M8 3v4M16 3v4M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span> Pagos</button>
+        <button class="nav-item" data-view="aprobaciones"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M6 4h9l3 3v13H6V4Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 4v4h4M9 12h6M9 16h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span> Comprobaciones</button>
+        <button class="nav-item" data-view="calendario"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="15" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M8 3v4M16 3v4M4 10h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span> Calendario</button>
+        <button class="nav-item" data-view="reportes"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 19V9m7 10V5m7 14v-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3 19h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span> Dashboards</button>
+        <button class="nav-item" data-view="sucursales"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 20V10l8-5 8 5v10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 20v-5h6v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span> Sucursales</button>
       </nav>
-
-      <div class="sidebar-footer">
-        <div class="user-card">
-          <div class="avatar">KM</div>
-          <div><strong>Kevin Martínez</strong><span>Responsable de pagos</span></div>
-        </div>
-      </div>
     </aside>
 
-    <main class="main-content">
-      <header class="topbar">
-        <button class="menu-toggle" id="menuToggle">☰</button>
-        <div class="search-box"><span>⌕</span><input id="globalSearch" placeholder="Buscar sucursal, servicio o proveedor..." /></div>
-        <div class="top-actions">
-          <button class="icon-btn" id="notificationBtn">🔔<span class="notification-dot"></span></button>
-          <button class="primary-btn" id="newPaymentBtn">+ Nuevo pago</button>
+    <main class="main-content" id="contenidoPrincipal" tabindex="-1">
+      <section class="enterprise-filters" aria-label="Filtros operativos">
+        <div class="filter-heading">
+          <span class="filter-symbol" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M7 12h10M10 18h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </span>
+          <div><strong>Filtros</strong></div>
         </div>
-      </header>
+        <label><span>Sucursal</span><select id="branchFilter"><option value="">Todas</option><option value="chihuahua">Chihuahua</option><option value="juárez">Juárez</option><option value="parral">Parral</option><option value="delicias">Delicias</option></select></label>
+        <label><span>Servicio</span><select id="serviceFilter"><option value="">Todos</option><option value="cfe">CFE</option><option value="agua">Agua</option><option value="internet">Internet</option><option value="limpieza">Limpieza</option></select></label>
+        <label><span>Estado</span><select id="statusFilter"><option value="">Todos</option><option value="listo">Listo</option><option value="pendiente">Pendiente</option><option value="variación">Variación</option><option value="aprobada">Aprobada</option></select></label>
+        <label><span>Periodo</span><select id="periodFilter"><option value="julio 2026">Julio 2026</option><option value="junio 2026">Junio 2026</option><option value="mayo 2026">Mayo 2026</option></select></label>
+        <button class="clear-filters" id="clearFilters" type="button">Limpiar</button>
+        <span class="filter-result" id="filterResult">Vista general</span>
+      </section>
 
-      <section class="view active" id="inicio">
+      <section class="view" id="inicio">
         <div class="page-heading">
           <div><p class="eyebrow">CENTRO DE TRABAJO</p><h1>Buenos días, Kevin</h1><p>Esto es lo que necesita tu atención hoy.</p></div>
           <div class="date-pill">Semana 29 · 20–26 julio</div>
         </div>
+
+        <section class="quick-actions" aria-labelledby="quickActionsTitle">
+          <div class="quick-actions-copy">
+            <div><h2 id="quickActionsTitle">¿Qué necesitas hacer?</h2></div>
+          </div>
+          <div class="quick-actions-list">
+            <button type="button" class="quick-action primary" data-quick-go="programacion"><strong>Preparar pagos</strong><small>Agrupar pagos de la semana</small></button>
+            <button type="button" class="quick-action" data-quick-go="calendario"><strong>Revisar vencimientos</strong><small>Consultar fechas próximas</small></button>
+            <button type="button" class="quick-action" data-quick-go="aprobaciones"><strong>Revisar comprobaciones</strong><small>Completar expedientes de pago</small></button>
+          </div>
+        </section>
 
         <div class="kpi-grid">
           <article class="kpi-card blue"><div class="kpi-icon">$</div><div><span>Por pagar esta semana</span><strong>$184,620</strong><small>18 obligaciones</small></div></article>
@@ -66,10 +148,10 @@
           <article class="panel">
             <div class="panel-header"><div><h2>Necesita tu atención</h2><p>Prioridades ordenadas por urgencia</p></div><button class="link-btn">Ver todas</button></div>
             <div class="attention-list" id="attentionList">
-              <button class="attention-item critical" data-action="open-payment"><span class="status-icon">!</span><div><strong>CFE · Sucursal Chihuahua</strong><p>Vence en 3 días · Importe $42,650</p></div><span class="tag">Crítica</span><span>›</span></button>
-              <button class="attention-item warning" data-action="open-anomaly"><span class="status-icon">↗</span><div><strong>Internet · Sucursal Juárez</strong><p>El importe aumentó 22% contra el promedio</p></div><span class="tag">Variación</span><span>›</span></button>
-              <button class="attention-item info" data-action="open-proof"><span class="status-icon">▣</span><div><strong>Limpieza · Sucursal Delicias</strong><p>El comprobante fue rechazado por el gerente</p></div><span class="tag">Corrección</span><span>›</span></button>
-              <button class="attention-item success" data-action="go-programacion"><span class="status-icon">✓</span><div><strong>4 pagos listos para solicitud</strong><p>Total preparado: $76,430</p></div><span class="tag">Listo</span><span>›</span></button>
+              <button class="attention-item critical" data-action="open-payment"><span class="attention-copy"><strong>CFE · Chihuahua</strong><span>Vence en 3 días · <b>$42,650</b></span></span><span class="attention-meta"><span class="tag">Crítica</span><small>Preparar pago <b aria-hidden="true">→</b></small></span></button>
+              <button class="attention-item warning" data-action="open-anomaly"><span class="attention-copy"><strong>Internet · Juárez</strong><span>Aumentó <b>22%</b> contra el promedio</span></span><span class="attention-meta"><span class="tag">Variación</span><small>Revisar importe <b aria-hidden="true">→</b></small></span></button>
+              <button class="attention-item info" data-action="open-proof"><span class="attention-copy"><strong>Limpieza · Delicias</strong><span>Comprobante rechazado por el gerente</span></span><span class="attention-meta"><span class="tag">Corrección</span><small>Corregir archivo <b aria-hidden="true">→</b></small></span></button>
+              <button class="attention-item success" data-action="go-programacion"><span class="attention-copy"><strong>4 pagos listos</strong><span>Total: <b>$76,430</b></span></span><span class="attention-meta"><span class="tag">Listo</span><small>Generar solicitud <b aria-hidden="true">→</b></small></span></button>
             </div>
           </article>
 
@@ -103,23 +185,34 @@
       </section>
 
       <section class="view" id="calendario">
-        <div class="page-heading"><div><p class="eyebrow">PLANEACIÓN</p><h1>Calendario operativo</h1><p>Vencimientos, pagos y comprobaciones en una sola vista.</p></div><button class="primary-btn">+ Agregar obligación</button></div>
-        <div class="panel calendar-panel">
-          <div class="calendar-toolbar"><div class="month-nav"><button>‹</button><h2>Julio 2026</h2><button>›</button></div><div class="filter-row"><select><option>Todas las sucursales</option><option>Chihuahua</option><option>Juárez</option></select><select><option>Todos los servicios</option><option>CFE</option><option>Agua</option></select><button class="secondary-btn">Semana</button><button class="primary-btn small">Mes</button></div></div>
-          <div class="calendar-grid" id="calendarGrid"></div>
+        <div class="page-heading"><div><p class="eyebrow">AGENDA OPERATIVA</p><h1>Calendario de gastos</h1><p>Organiza vencimientos y atiende cada compromiso en orden.</p></div></div>
+        <div class="calendar-command-strip">
+          <article class="calendar-focus-card"><i aria-hidden="true">7</i><div><span>Esta semana</span><strong>$108,250</strong><small>5 compromisos programados</small></div></article>
+          <article class="calendar-focus-card urgent"><i aria-hidden="true">!</i><div><span>Atención prioritaria</span><strong>3 pendientes</strong><small>Empieza por los próximos a vencer</small></div></article>
+          <article class="calendar-focus-card healthy"><i aria-hidden="true">✓</i><div><span>Cobertura disponible</span><strong>92%</strong><small>Presupuesto suficiente</small></div></article>
+        </div>
+        <div class="calendar-workspace">
+          <div class="panel calendar-panel">
+            <div class="calendar-toolbar"><div class="month-nav"><button aria-label="Mes anterior">‹</button><h2>Julio 2026</h2><button aria-label="Mes siguiente">›</button></div><div class="filter-row"><select id="calendarBranchFilter"><option value="">Todas las sucursales</option><option>Chihuahua</option><option>Juárez</option><option>Parral</option><option>Delicias</option></select><select id="calendarServiceFilter"><option value="">Todos los servicios</option><option>CFE</option><option>Agua</option><option>Internet</option><option>Limpieza</option></select><button class="primary-btn small">Agenda</button><button class="secondary-btn">Mes</button></div></div>
+            <div class="date-rail" id="dateRail"></div>
+            <div class="calendar-agenda-view" id="calendarAgenda"></div>
+            <div class="calendar-month-view" id="calendarMonthView"><div class="calendar-grid" id="calendarGrid"></div></div>
+          </div>
+          <aside class="panel operation-detail" id="operationDetail"></aside>
         </div>
       </section>
 
       <section class="view" id="programacion">
-        <div class="page-heading"><div><p class="eyebrow">CICLO SEMANAL</p><h1>Programación semanal</h1><p>Confirma, corrige y agrupa pagos antes de solicitar fondos.</p></div><button class="primary-btn" id="generateRequestBtn">Generar solicitud</button></div>
-        <div class="summary-strip"><div><span>Pagos seleccionados</span><strong id="selectedCount">4</strong></div><div><span>Total seleccionado</span><strong id="selectedTotal">$76,430</strong></div><div><span>Vencen esta semana</span><strong>7</strong></div><div><span>Con variación</span><strong>2</strong></div></div>
-        <div class="panel table-panel"><div class="table-toolbar"><div class="filter-row"><button class="filter-chip active">Todos</button><button class="filter-chip">Listos</button><button class="filter-chip">Falta recibo</button><button class="filter-chip">Con variación</button></div><button class="secondary-btn">Importar Excel</button></div><div class="table-wrap"><table><thead><tr><th></th><th>Servicio / sucursal</th><th>Vencimiento</th><th>Importe</th><th>Variación</th><th>Estado</th><th></th></tr></thead><tbody id="paymentsTable"></tbody></table></div></div>
+        <div class="page-heading"><div><p class="eyebrow">EJECUCIÓN</p><h1>Pagos autorizados</h1><p>Ejecuta únicamente pagos respaldados por una solicitud aprobada.</p></div></div>
+        <button class="payment-trigger" id="newPaymentBtn" type="button" hidden aria-hidden="true" tabindex="-1"></button>
+        <div class="panel table-panel payment-list-panel"><div class="table-toolbar"><div class="filter-row"><button class="filter-chip active">Todos</button><button class="filter-chip">Listos</button><button class="filter-chip">Falta recibo</button><button class="filter-chip">Con variación</button></div><button class="secondary-btn">Importar Excel</button></div><div class="table-wrap"><table><thead><tr><th>Solicitud</th><th>Servicio / sucursal</th><th>Vencimiento</th><th>Importe</th><th>Variación</th><th>Estado</th><th>Acción</th><th></th></tr></thead><tbody id="paymentsTable"></tbody></table></div></div>
       </section>
 
-      <section class="view" id="solicitudes">
-        <div class="page-heading"><div><p class="eyebrow">FONDOS</p><h1>Solicitudes de fondos</h1><p>Seguimiento de solicitudes, autorizaciones y origen de recursos.</p></div><button class="primary-btn">+ Nueva solicitud</button></div>
-        <div class="kpi-grid compact"><article class="metric"><span>Pendientes</span><strong>6</strong><small>$214,890</small></article><article class="metric"><span>En aprobación</span><strong>3</strong><small>$96,340</small></article><article class="metric"><span>Autorizadas</span><strong>8</strong><small>$341,200</small></article><article class="metric"><span>Rechazadas</span><strong>1</strong><small>$12,850</small></article></div>
-        <div class="panel table-panel"><div class="table-wrap"><table><thead><tr><th>Folio</th><th>Fecha</th><th>Conceptos</th><th>Sucursales</th><th>Total</th><th>Estado</th><th></th></tr></thead><tbody><tr><td><strong>SF-2026-0184</strong></td><td>20 jul 2026</td><td>4 pagos</td><td>Chihuahua, Juárez</td><td><strong>$76,430</strong></td><td><span class="status waiting">En revisión</span></td><td><button class="more-btn">•••</button></td></tr><tr><td><strong>SF-2026-0183</strong></td><td>18 jul 2026</td><td>7 pagos</td><td>6 sucursales</td><td><strong>$128,640</strong></td><td><span class="status approved">Autorizada</span></td><td><button class="more-btn">•••</button></td></tr><tr><td><strong>SF-2026-0182</strong></td><td>17 jul 2026</td><td>2 pagos</td><td>Parral</td><td><strong>$19,820</strong></td><td><span class="status rejected">Corrección</span></td><td><button class="more-btn">•••</button></td></tr></tbody></table></div></div>
+      <section class="view active" id="solicitudes">
+        <div class="page-heading"><div><p class="eyebrow">FONDOS</p><h1>Solicitudes de fondos</h1><p>Seguimiento de solicitudes, autorizaciones y origen de recursos.</p></div></div>
+        <div class="section-actions"><button class="primary-btn" type="button">+ Nueva solicitud</button></div>
+        <div class="kpi-grid compact"><article class="metric"><span>Pendientes</span><strong id="requestPendingCount">2</strong><small id="requestPendingAmount">$107,630</small></article><article class="metric"><span>En aprobación</span><strong id="requestReviewCount">2</strong><small>Requieren decisión</small></article><article class="metric"><span>Autorizadas</span><strong id="requestApprovedCount">1</strong><small id="requestApprovedAmount">$128,640</small></article><article class="metric"><span>Corrección / rechazo</span><strong id="requestRejectedCount">1</strong><small>Requieren ajustes</small></article></div>
+        <div class="panel table-panel"><div class="table-wrap"><table><thead><tr><th>Folio</th><th>Fecha requerida</th><th>Concepto</th><th>Sucursal</th><th>Total</th><th>Estado</th><th></th></tr></thead><tbody id="requestsTable"><tr><td><strong>SF-2026-0185</strong></td><td>21 jul 2026</td><td>Limpieza semanal</td><td>6 sucursales</td><td><strong>$31,200</strong></td><td><span class="status waiting">En revisión</span></td><td><button class="more-btn">•••</button></td></tr><tr><td><strong>SF-2026-0184</strong></td><td>20 jul 2026</td><td>Servicios de la semana</td><td>Chihuahua, Juárez</td><td><strong>$76,430</strong></td><td><span class="status waiting">En revisión</span></td><td><button class="more-btn">•••</button></td></tr><tr><td><strong>SF-2026-0183</strong></td><td>18 jul 2026</td><td>Servicios recurrentes</td><td>6 sucursales</td><td><strong>$128,640</strong></td><td><span class="status approved">Autorizada</span></td><td><button class="more-btn">•••</button></td></tr><tr><td><strong>SF-2026-0182</strong></td><td>17 jul 2026</td><td>Servicios de Parral</td><td>Parral</td><td><strong>$19,820</strong></td><td><span class="status rejected">Corrección</span></td><td><button class="more-btn">•••</button></td></tr></tbody></table></div></div>
       </section>
 
       <section class="view" id="limpieza">
@@ -128,40 +221,151 @@
       </section>
 
       <section class="view" id="aprobaciones">
-        <div class="page-heading"><div><p class="eyebrow">AUTORIZACIONES</p><h1>Aprobaciones</h1><p>Decisiones rápidas con contexto financiero y operativo.</p></div></div>
-        <div class="approval-layout"><div class="approval-list"><button class="approval-card active"><div><strong>SF-2026-0184</strong><span>Vence hoy</span></div><h3>Servicios de 2 sucursales</h3><p>4 pagos · Chihuahua y Juárez</p><strong class="amount">$76,430</strong></button><button class="approval-card"><div><strong>SF-2026-0185</strong><span>Vence mañana</span></div><h3>Limpieza semanal</h3><p>6 sucursales</p><strong class="amount">$31,200</strong></button></div><article class="panel approval-detail"><div class="panel-header"><div><h2>Solicitud SF-2026-0184</h2><p>Preparada por Kevin Martínez</p></div><span class="status waiting">En revisión</span></div><div class="detail-grid"><div><span>Importe solicitado</span><strong>$76,430</strong></div><div><span>Presupuesto disponible</span><strong>$426,300</strong></div><div><span>Fecha límite</span><strong>22 jul 2026</strong></div><div><span>Riesgo</span><strong class="orange-text">Recargo por atraso</strong></div></div><h3>Pagos incluidos</h3><div class="included-payment"><div><strong>CFE · Chihuahua</strong><span>Vence 22 jul</span></div><strong>$42,650</strong></div><div class="included-payment"><div><strong>Internet · Juárez</strong><span>Variación +22%</span></div><strong>$8,920</strong></div><div class="included-payment"><div><strong>Limpieza · 2 sucursales</strong><span>10 días confirmados</span></div><strong>$24,860</strong></div><label>Comentario<textarea placeholder="Agrega una observación para el solicitante..."></textarea></label><div class="approval-actions"><button class="danger-btn">Rechazar</button><button class="secondary-btn">Solicitar corrección</button><button class="primary-btn" id="approveBtn">Aprobar solicitud</button></div></article></div>
+        <div class="page-heading"><div><p class="eyebrow">HISTORIAL DE PAGOS</p><h1>Comprobaciones</h1><p>Recuento de pagos realizados y sus documentos comprobatorios.</p></div></div>
+        <div class="panel table-panel proof-panel">
+          <div class="proof-workbar">
+            <div class="proof-progress">
+              <span class="proof-progress-icon" aria-hidden="true">✓</span>
+              <div><strong><span id="proofCompleteCount">2</span> expedientes completos</strong><small><span id="proofPendingCount">1</span> requiere comprobante</small></div>
+            </div>
+            <div class="filter-row"><button class="filter-chip active">Todos</button><button class="filter-chip">Pendientes</button><button class="filter-chip">Completos</button></div>
+            <button class="proof-download" id="downloadProofs" type="button"><span aria-hidden="true">↓</span> Descargar listado</button>
+          </div>
+          <div class="table-wrap proof-table-wrap"><table><thead><tr><th>Solicitud</th><th>Pago realizado</th><th>Fecha</th><th>Importe</th><th>Comprobante</th><th>Acción</th><th></th></tr></thead><tbody id="proofTable"><tr><td><strong>SF-2026-0183</strong></td><td><strong>CFE</strong><small>Chihuahua</small></td><td>22 jul 2026</td><td><strong>$42,650</strong></td><td><span class="status approved">Completo</span></td><td><button class="proof-action-btn complete" type="button">Ver comprobante</button></td><td><button class="more-btn" type="button">•••</button></td></tr><tr><td><strong>SF-2026-0183</strong></td><td><strong>Internet</strong><small>Juárez</small></td><td>21 jul 2026</td><td><strong>$8,920</strong></td><td><span class="status rejected">Pendiente</span></td><td><button class="proof-action-btn pending" type="button">Adjuntar</button></td><td><button class="more-btn" type="button">•••</button></td></tr><tr><td><strong>SF-2026-0181</strong></td><td><strong>Agua</strong><small>Parral</small></td><td>20 jul 2026</td><td><strong>$5,480</strong></td><td><span class="status approved">Completo</span></td><td><button class="proof-action-btn complete" type="button">Ver comprobante</button></td><td><button class="more-btn" type="button">•••</button></td></tr></tbody></table></div>
+        </div>
       </section>
 
       <section class="view" id="reportes">
-        <div class="page-heading"><div><p class="eyebrow">ANÁLISIS</p><h1>Reportes e indicadores</h1><p>Información administrativa convertida en decisiones de ahorro.</p></div><button class="secondary-btn">Exportar Excel</button></div>
-        <div class="kpi-grid compact"><article class="metric"><span>Gasto mensual</span><strong>$898,700</strong><small>+4.8% vs junio</small></article><article class="metric"><span>Recargos evitados</span><strong>$18,450</strong><small>12 alertas atendidas</small></article><article class="metric"><span>Expedientes completos</span><strong>96%</strong><small>Meta 100%</small></article><article class="metric"><span>Tiempo de aprobación</span><strong>7.4 h</strong><small>-31% vs mes anterior</small></article></div>
-        <div class="content-grid half"><article class="panel"><div class="panel-header"><div><h2>Gasto mensual</h2><p>Enero–julio 2026</p></div></div><div class="line-chart"><svg viewBox="0 0 700 250" preserveAspectRatio="none"><polyline points="0,210 110,170 220,180 330,120 440,135 550,80 700,52" fill="none" stroke="#1261a6" stroke-width="5"/><polyline points="0,230 110,205 220,195 330,165 440,140 550,115 700,90" fill="none" stroke="#ff7a21" stroke-width="4" stroke-dasharray="10 8"/></svg><div class="axis-labels"><span>Ene</span><span>Feb</span><span>Mar</span><span>Abr</span><span>May</span><span>Jun</span><span>Jul</span></div></div></article><article class="panel"><div class="panel-header"><div><h2>Sucursales con mayor variación</h2><p>Contra promedio de 3 meses</p></div></div><div class="ranking"><div><span>1</span><div><strong>Juárez</strong><small>Internet y CFE</small></div><b>+22%</b></div><div><span>2</span><div><strong>Parral</strong><small>Agua</small></div><b>+17%</b></div><div><span>3</span><div><strong>Delicias</strong><small>Limpieza</small></div><b>+12%</b></div></div></article></div>
+        <div class="page-heading"><div><p class="eyebrow">INTELIGENCIA OPERATIVA</p><h1>Dashboards</h1><p>Indicadores visuales para detectar riesgos, tendencias y oportunidades de ahorro.</p></div></div>
+
+        <div class="dashboard-toolbar">
+          <label>Sucursal<select id="dashboardBranch"><option value="Todas las sucursales">Todas las sucursales</option><option>Chihuahua</option><option>Juárez</option><option>Parral</option><option>Delicias</option></select></label>
+          <label>Periodo<select id="dashboardPeriod"><option value="julio">Julio 2026</option><option value="junio">Junio 2026</option><option value="mayo">Mayo 2026</option></select></label>
+          <button class="secondary-btn" id="exportDashboard" type="button">Exportar dashboard</button>
+        </div>
+
+        <div class="kpi-grid compact dashboard-kpis">
+          <article class="metric"><span>Gasto del periodo</span><strong id="dashSpend">$898,700</strong><small id="dashSpendTrend" class="trend-up">↑ 4.8% vs junio</small></article>
+          <article class="metric"><span>Ahorro generado</span><strong id="dashSavings">$18,450</strong><small class="trend-good">12 alertas atendidas</small></article>
+          <article class="metric"><span>Expedientes completos</span><strong id="dashComplete">96%</strong><small>Meta operativa: 100%</small></article>
+          <article class="metric"><span>Tiempo de autorización externa</span><strong id="dashTime">7.4 h</strong><small class="trend-good">↓ 31% vs mes anterior</small></article>
+        </div>
+
+        <div class="dashboard-grid">
+          <article class="panel dashboard-card trend-card">
+            <div class="panel-header"><div><h2>Evolución del gasto</h2><p>Gasto real frente al presupuesto planeado</p></div><div class="chart-legend"><span><i class="actual"></i>Real</span><span><i class="planned"></i>Planeado</span></div></div>
+            <div class="dashboard-line-chart">
+              <div class="chart-y-axis"><span>$1.0M</span><span>$750k</span><span>$500k</span><span>$250k</span><span>$0</span></div>
+              <svg viewBox="0 0 700 260" preserveAspectRatio="none" role="img" aria-label="Tendencia ascendente del gasto mensual">
+                <defs><linearGradient id="areaBlue" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1683bd" stop-opacity=".36"/><stop offset="1" stop-color="#1683bd" stop-opacity=".02"/></linearGradient></defs>
+                <g class="chart-grid-lines"><path d="M0 20H700M0 75H700M0 130H700M0 185H700M0 240H700"/></g>
+                <path class="chart-area" d="M0 208 L116 174 L233 183 L350 121 L466 137 L583 77 L700 48 L700 240 L0 240 Z"/>
+                <polyline class="chart-line actual-line" points="0,208 116,174 233,183 350,121 466,137 583,77 700,48"/>
+                <polyline class="chart-line planned-line" points="0,224 116,205 233,194 350,164 466,140 583,113 700,91"/>
+                <g class="chart-points"><circle cx="0" cy="208" r="5"/><circle cx="116" cy="174" r="5"/><circle cx="233" cy="183" r="5"/><circle cx="350" cy="121" r="5"/><circle cx="466" cy="137" r="5"/><circle cx="583" cy="77" r="5"/><circle cx="700" cy="48" r="6"/></g>
+              </svg>
+              <div class="chart-x-axis"><span>Ene</span><span>Feb</span><span>Mar</span><span>Abr</span><span>May</span><span>Jun</span><span>Jul</span></div>
+            </div>
+          </article>
+
+          <article class="panel dashboard-card service-card">
+            <div class="panel-header"><div><h2>Distribución por servicio</h2><p>Participación del gasto total</p></div></div>
+            <div class="service-donut-layout">
+              <div class="service-donut" role="img" aria-label="CFE representa 44 por ciento del gasto"><div><strong>100%</strong><span>$898.7 mil</span></div></div>
+              <div class="service-legend">
+                <div><i class="cfe"></i><span>CFE<small>44% del total</small></span><strong>$395k</strong></div>
+                <div><i class="clean"></i><span>Limpieza<small>27% del total</small></span><strong>$243k</strong></div>
+                <div><i class="internet"></i><span>Internet<small>18% del total</small></span><strong>$162k</strong></div>
+                <div><i class="water"></i><span>Agua<small>11% del total</small></span><strong>$99k</strong></div>
+              </div>
+            </div>
+          </article>
+
+          <article class="panel dashboard-card budget-bars-card">
+            <div class="panel-header"><div><h2>Presupuesto por sucursal</h2><p>Ejercido contra presupuesto asignado</p></div><span class="status approved">Saludable</span></div>
+            <div class="budget-bars">
+              <div><span><strong>Chihuahua</strong><small>$142k de $165k</small></span><div><i style="width:86%"></i></div><b>86%</b></div>
+              <div><span><strong>Juárez</strong><small>$136k de $148k</small></span><div><i class="warning" style="width:92%"></i></div><b>92%</b></div>
+              <div><span><strong>Parral</strong><small>$89k de $119k</small></span><div><i style="width:75%"></i></div><b>75%</b></div>
+              <div><span><strong>Delicias</strong><small>$77k de $112k</small></span><div><i style="width:69%"></i></div><b>69%</b></div>
+            </div>
+          </article>
+
+          <article class="panel dashboard-card status-card">
+            <div class="panel-header"><div><h2>Estado de obligaciones</h2><p>24 compromisos del periodo</p></div></div>
+            <div class="status-chart">
+              <div class="status-total"><strong>24</strong><span>Total</span></div>
+              <div class="status-stack" aria-label="17 pagadas, 5 pendientes y 2 vencidas"><i class="paid" style="width:71%"></i><i class="pending" style="width:21%"></i><i class="overdue" style="width:8%"></i></div>
+              <div class="status-legend">
+                <div><i class="paid"></i><span>Pagadas</span><strong>17</strong></div>
+                <div><i class="pending"></i><span>Pendientes</span><strong>5</strong></div>
+                <div><i class="overdue"></i><span>Vencidas</span><strong>2</strong></div>
+              </div>
+            </div>
+          </article>
+
+          <article class="panel dashboard-card ranking-card">
+            <div class="panel-header"><div><h2>Mayor variación</h2><p>Contra promedio de los últimos 3 meses</p></div><button class="link-btn" data-go="sucursales">Ver sucursales</button></div>
+            <div class="ranking"><div><span>1</span><div><strong>Juárez</strong><small>Internet y CFE</small></div><b>+22%</b></div><div><span>2</span><div><strong>Parral</strong><small>Agua</small></div><b>+17%</b></div><div><span>3</span><div><strong>Delicias</strong><small>Limpieza</small></div><b>+12%</b></div></div>
+          </article>
+
+          <article class="panel dashboard-card efficiency-card">
+            <div class="panel-header"><div><h2>Eficiencia operativa</h2><p>Cumplimiento de indicadores clave</p></div></div>
+            <div class="efficiency-list">
+              <div><span><strong>Pagos a tiempo</strong><small>Meta 95%</small></span><b>94%</b><div><i style="width:94%"></i></div></div>
+              <div><span><strong>Comprobación completa</strong><small>Meta 100%</small></span><b>96%</b><div><i style="width:96%"></i></div></div>
+              <div><span><strong>Solicitudes sin corrección</strong><small>Meta 90%</small></span><b>88%</b><div><i class="warning" style="width:88%"></i></div></div>
+            </div>
+          </article>
+        </div>
       </section>
 
       <section class="view" id="sucursales">
-        <div class="page-heading"><div><p class="eyebrow">CATÁLOGOS</p><h1>Sucursales y casas</h1><p>Expediente maestro de servicios, responsables y presupuesto.</p></div><button class="primary-btn">+ Nueva sucursal</button></div>
+        <div class="page-heading"><div><p class="eyebrow">CATÁLOGOS</p><h1>Sucursales y casas</h1><p>Expediente maestro de servicios, responsables y presupuesto.</p></div></div>
+        <div class="section-actions"><button class="primary-btn" type="button">+ Nueva sucursal</button></div>
         <div class="branch-grid"><article class="branch-card"><div class="branch-top"><div class="branch-icon">CH</div><span class="status approved">Activa</span></div><h3>Sucursal Chihuahua</h3><p>Región Norte · Centro de costo CC-104</p><div class="branch-stats"><div><span>Servicios</span><strong>8</strong></div><div><span>Presupuesto</span><strong>$165k</strong></div><div><span>Responsable</span><strong>Laura M.</strong></div></div><button class="secondary-btn full-width">Ver expediente</button></article><article class="branch-card"><div class="branch-top"><div class="branch-icon">JR</div><span class="status approved">Activa</span></div><h3>Sucursal Juárez</h3><p>Región Norte · Centro de costo CC-105</p><div class="branch-stats"><div><span>Servicios</span><strong>7</strong></div><div><span>Presupuesto</span><strong>$148k</strong></div><div><span>Responsable</span><strong>Daniel R.</strong></div></div><button class="secondary-btn full-width">Ver expediente</button></article><article class="branch-card"><div class="branch-top"><div class="branch-icon">PA</div><span class="status approved">Activa</span></div><h3>Sucursal Parral</h3><p>Región Centro · Centro de costo CC-109</p><div class="branch-stats"><div><span>Servicios</span><strong>6</strong></div><div><span>Presupuesto</span><strong>$119k</strong></div><div><span>Responsable</span><strong>María T.</strong></div></div><button class="secondary-btn full-width">Ver expediente</button></article></div>
       </section>
     </main>
   </div>
 
   <div class="modal-backdrop" id="modalBackdrop">
-    <div class="modal">
-      <button class="modal-close" id="modalClose">×</button>
-      <div class="modal-icon">$</div>
-      <h2 id="modalTitle">Registrar nuevo pago</h2>
-      <p id="modalSubtitle">Captura una obligación extraordinaria o registra un recibo.</p>
+    <div class="modal payment-modal">
+      <button class="modal-close" id="modalClose" type="button" aria-label="Cerrar">×</button>
+      <div class="payment-modal-header">
+        <div class="modal-icon" aria-hidden="true">$</div>
+        <div class="modal-header-copy"><span>PAGO AUTORIZADO</span><h2 id="modalTitle">Registrar pago</h2><p id="modalSubtitle">Completa los datos para ejecutar y comprobar el movimiento.</p></div>
+      </div>
       <form id="paymentForm" class="form-grid">
-        <label>Servicio<select required><option value="">Selecciona...</option><option>CFE</option><option>Agua</option><option>Internet</option><option>Limpieza</option></select></label>
-        <label>Sucursal<select required><option value="">Selecciona...</option><option>Chihuahua</option><option>Juárez</option><option>Parral</option></select></label>
-        <label>Importe<input type="number" placeholder="$0.00" required></label>
-        <label>Fecha límite<input type="date" required></label>
-        <label class="full">Concepto<input type="text" placeholder="Describe el pago"></label>
+        <section class="payment-form-section request-context">
+          <div class="form-section-title"><span>1</span><div><strong>Solicitud</strong><small>Origen autorizado del pago</small></div></div>
+          <label class="full">Solicitud aprobada<select id="approvedRequestSelect" required><option value="">Selecciona una solicitud...</option><option value="SF-2026-0183">SF-2026-0183 · $128,640 · Autorizada</option><option value="SF-2026-0179">SF-2026-0179 · $33,860 · Autorizada</option><option value="SF-2026-0178">SF-2026-0178 · $19,380 · Autorizada</option></select></label>
+        </section>
+        <section class="payment-form-section payment-data">
+          <div class="form-section-title full"><span>2</span><div><strong>Datos del pago</strong><small>Información del movimiento</small></div></div>
+          <label>Servicio<select required><option value="">Selecciona...</option><option>CFE</option><option>Agua</option><option>Internet</option><option>Limpieza</option></select></label>
+          <label>Sucursal<select required><option value="">Selecciona...</option><option>Chihuahua</option><option>Juárez</option><option>Parral</option></select></label>
+          <label>Importe<input type="number" placeholder="$0.00" required></label>
+          <label>Fecha de pago<input type="date" required></label>
+          <label class="full">Concepto<input type="text" placeholder="Describe el pago"></label>
+          <label>Método de pago<select required><option value="">Selecciona...</option><option>Transferencia</option><option>Cheque</option><option>Domiciliación</option></select></label>
+          <label>Referencia bancaria<input type="text" placeholder="Folio o referencia" required></label>
+        </section>
+        <section class="payment-form-section proof-upload-section">
+          <div class="form-section-title"><span>3</span><div><strong>Comprobante</strong><small>PDF, JPG o PNG</small></div></div>
+          <label class="proof-file-label"><span>Adjunta el recibo o comprobante</span><input type="file" accept="image/*,.pdf" required></label>
+        </section>
         <div class="modal-actions full"><button type="button" class="secondary-btn" id="cancelModal">Cancelar</button><button type="submit" class="primary-btn">Guardar pago</button></div>
       </form>
     </div>
   </div>
   <div class="toast" id="toast">Acción realizada correctamente</div>
+  <aside class="pending-panel" id="pendingPanel" aria-label="Pendientes" aria-hidden="true">
+    <div class="pending-header"><div><strong>Pendientes</strong><span>3 requieren atención</span></div><button type="button" id="closePending" aria-label="Cerrar">×</button></div>
+    <button type="button" class="pending-item urgent" data-pending-view="programacion"><span>1</span><div><strong>Recibo pendiente</strong><small>Internet · Juárez</small></div><b>→</b></button>
+    <button type="button" class="pending-item warning" data-pending-view="aprobaciones"><span>2</span><div><strong>Comprobantes pendientes</strong><small>2 pagos requieren archivo</small></div><b>→</b></button>
+    <button type="button" class="pending-item info" data-pending-view="calendario"><span>3</span><div><strong>Próximos vencimientos</strong><small>Consultar calendario</small></div><b>→</b></button>
+  </aside>
   <script src="app.js"></script>
+  <script src="enterprise.js"></script>
 </body>
 </html>
