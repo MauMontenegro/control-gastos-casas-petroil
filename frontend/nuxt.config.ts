@@ -2,7 +2,11 @@ import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 
 export default defineNuxtConfig({
   ssr: false,
-  devtools: { enabled: true },
+  // Desactivado: la versión de Nuxt DevTools disponible hoy depende de
+  // @nuxt/kit@4.x, incompatible con el Nuxt 3.21.10 pinneado del proyecto
+  // (causa un ENOENT al abrir el panel). Reactivar cuando haya una versión
+  // de devtools compatible con Nuxt 3.
+  devtools: { enabled: false },
   compatibilityDate: '2026-07-27',
   experimental: { appManifest: false },
 
