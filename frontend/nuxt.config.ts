@@ -4,6 +4,7 @@ export default defineNuxtConfig({
   ssr: false,
   devtools: { enabled: true },
   compatibilityDate: '2026-07-27',
+  experimental: { appManifest: false },
 
   modules: [
     '@nuxt/eslint',

@@ -1,5 +1,9 @@
 import { useAuth0 } from '@auth0/auth0-vue'
 
+// Desactivado temporalmente: se renombró de auth.global.ts a auth.ts para
+// dejar de aplicarse a todas las rutas mientras se prueba la app en local
+// sin credenciales reales de Auth0. Para reactivarlo, renombrar de vuelta
+// a auth.global.ts (o registrarlo por página con definePageMeta).
 export default defineNuxtRouteMiddleware((to) => {
   if (import.meta.server || to.path === '/callback') return
 
