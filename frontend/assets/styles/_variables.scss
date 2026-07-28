@@ -1,0 +1,16 @@
+// Paleta portada de legacy-prototype/styles.css (:root).
+// Vuetify ya conoce estos mismos colores vía el theme en plugins/vuetify.ts;
+// estas variables SCSS son para los componentes a medida (sidebar, KPI, donut,
+// calendario, filter-chips) que no pasan por el sistema de theming de Vuetify.
+$brand-blue: #1261a6;
+$brand-blue-dark: #0a3f73;
+$brand-blue-light: #eaf4fb;
+$brand-orange: #ff7a21;
+$brand-orange-light: #fff1e8;
+$brand-green: #1fa56b;
+$brand-red: #d94f4f;
+$brand-bg: #f4f7fb;
+$brand-text: #172033;
+$brand-muted: #6e7788;
+$brand-border: #e3e9f1;
+$brand-shadow: 0 10px 30px rgba(31, 61, 95, 0.08);

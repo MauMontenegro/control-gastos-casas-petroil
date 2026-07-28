@@ -1,5 +1,60 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
+import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
+
 export default defineNuxtConfig({
-  compatibilityDate: '2025-07-15',
-  devtools: { enabled: true }
+  ssr: false,
+  devtools: { enabled: true },
+  compatibilityDate: '2026-07-27',
+
+  modules: [
+    '@nuxt/eslint',
+    '@pinia/nuxt',
+    'pinia-plugin-persistedstate/nuxt',
+    '@vueuse/nuxt',
+    '@vee-validate/nuxt',
+    '@nuxtjs/i18n',
+    (_options, nuxt) => {
+      nuxt.hooks.hook('vite:extendConfig', (config) => {
+        config.plugins!.push(vuetify({ autoImport: true }))
+      })
+    },
+  ],
+
+  css: ['~/assets/styles/main.scss'],
+
+  build: {
+    transpile: ['vuetify'],
+  },
+
+  vite: {
+    vue: {
+      template: { transformAssetUrls },
+    },
+  },
+
+  eslint: {
+    config: {
+      stylistic: false,
+    },
+  },
+
+  i18n: {
+    restructureDir: false,
+    bundle: { optimizeTranslationDirective: false },
+    locales: [{ code: 'es', file: 'es.json', name: 'Español' }],
+    defaultLocale: 'es',
+    lazy: true,
+    langDir: 'locales/',
+    strategy: 'no_prefix',
+  },
+
+  runtimeConfig: {
+    public: {
+      auth0Domain: process.env.NUXT_PUBLIC_AUTH0_DOMAIN,
+      auth0ClientId: process.env.NUXT_PUBLIC_AUTH0_CLIENT_ID,
+      auth0Audience: process.env.NUXT_PUBLIC_AUTH0_AUDIENCE,
+      auth0RedirectUri: process.env.NUXT_PUBLIC_AUTH0_REDIRECT_URI,
+      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL,
+      socketUrl: process.env.NUXT_PUBLIC_SOCKET_URL,
+    },
+  },
 })

@@ -1,0 +1,143 @@
+@use './variables' as *;
+
+// Piezas a medida sin equivalente directo en Vuetify (ver plan de fidelidad
+// visual): sidebar de marca, KPI cards con badge de icono, donut de
+// presupuesto, grilla de calendario y filter-chips tipo píldora.
+
+.app-sidebar {
+  background: linear-gradient(180deg, $brand-blue-dark, #082e56);
+}
+
+.donut-center-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  text-align: center;
+}
+
+.app-sidebar__brand {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.app-sidebar__nav-item {
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.72);
+  font-weight: 600;
+
+  &:hover,
+  &--active {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+  }
+
+  &--active {
+    box-shadow: inset 3px 0 $brand-orange;
+  }
+}
+
+.kpi-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: $brand-shadow;
+}
+
+.kpi-card__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 20px;
+
+  &--blue {
+    background: $brand-blue-light;
+    color: $brand-blue;
+  }
+  &--orange {
+    background: $brand-orange-light;
+    color: $brand-orange;
+  }
+  &--red {
+    background: #fdecec;
+    color: $brand-red;
+  }
+  &--green {
+    background: #e9f8f1;
+    color: $brand-green;
+  }
+}
+
+.filter-chip {
+  border: 1px solid $brand-border;
+  background: #fff;
+  padding: 7px 14px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &--active {
+    background: $brand-blue;
+    color: #fff;
+    border-color: $brand-blue;
+  }
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-top: 1px solid $brand-border;
+  border-left: 1px solid $brand-border;
+}
+
+.calendar-day {
+  min-height: 110px;
+  border-right: 1px solid $brand-border;
+  border-bottom: 1px solid $brand-border;
+  padding: 9px;
+
+  &--head {
+    min-height: auto;
+    background: $brand-bg;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  &--today {
+    background: $brand-blue-light;
+  }
+
+  &__num {
+    font-size: 11px;
+    color: $brand-muted;
+  }
+}
+
+.calendar-event {
+  margin-top: 7px;
+  padding: 6px;
+  border-radius: 7px;
+  font-size: 10px;
+  background: $brand-blue-light;
+  color: $brand-blue;
+  border-left: 3px solid $brand-blue;
+
+  &--orange {
+    background: $brand-orange-light;
+    color: #b65716;
+    border-color: $brand-orange;
+  }
+  &--red {
+    background: #fdecec;
+    color: #a73d3d;
+    border-color: $brand-red;
+  }
+}
