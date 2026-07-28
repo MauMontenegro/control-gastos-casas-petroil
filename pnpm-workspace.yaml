@@ -1,3 +1,16 @@
 packages:
   - "frontend"
   # - "backend"   # descomentar cuando se agregue el backend Node/TS
+allowBuilds:
+  '@parcel/watcher': true
+  browser-tabs-lock: true
+  core-js: true
+  esbuild: true
+minimumReleaseAgeExclude:
+  - '@nuxt/kit@3.21.10'
+  - '@nuxt/nitro-server@3.21.10'
+  - '@nuxt/schema@3.21.10'
+  - '@nuxt/vite-builder@3.21.10'
+  - apexcharts@6.6.1
+  - nuxt@3.21.10
+  - vuetify@3.13.0
