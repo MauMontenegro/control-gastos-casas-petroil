@@ -1,0 +1,44 @@
+{
+  "nav": {
+    "inicio": "Inicio",
+    "calendario": "Calendario",
+    "pagos": "Pagos",
+    "solicitudes": "Solicitudes",
+    "limpieza": "Limpieza",
+    "comprobaciones": "Comprobaciones",
+    "reportes": "Dashboards",
+    "sucursales": "Sucursales"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "seeAll": "Ver todas",
+    "newRequest": "+ Nueva solicitud",
+    "newBranch": "+ Nueva sucursal",
+    "export": "Exportar",
+    "logout": "Cerrar sesión"
+  },
+  "status": {
+    "listo": "Listo",
+    "variacion": "Variación",
+    "falta-recibo": "Falta recibo",
+    "pagado": "Pagado",
+    "en-revision": "En revisión",
+    "autorizada": "Autorizada",
+    "correccion": "Corrección",
+    "completo": "Completo",
+    "pendiente": "Pendiente"
+  },
+  "dashboard": {
+    "eyebrow": "CENTRO DE TRABAJO",
+    "greeting": "Buenos días, {name}",
+    "subtitle": "Esto es lo que necesita tu atención hoy.",
+    "kpi": {
+      "porPagar": "Por pagar esta semana",
+      "proximosVencer": "Próximos a vencer",
+      "vencidos": "Vencidos",
+      "presupuestoDisponible": "Presupuesto disponible"
+    },
+    "attention": "Necesita tu atención",
+    "budget": "Presupuesto mensual"
+  }
+}
