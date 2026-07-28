@@ -1,0 +1,24 @@
+{
+  "name": "control-gastos-casas-petroil",
+  "private": true,
+  "packageManager": "pnpm@11.17.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "pnpm --filter frontend dev",
+    "build": "pnpm --filter frontend build",
+    "generate": "pnpm --filter frontend generate",
+    "preview": "pnpm --filter frontend preview",
+    "lint": "pnpm --filter frontend lint",
+    "lint:fix": "pnpm --filter frontend lint:fix",
+    "format": "pnpm --filter frontend format",
+    "typecheck": "pnpm --filter frontend typecheck",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "9.1.7",
+    "@commitlint/cli": "21.2.1",
+    "@commitlint/config-conventional": "21.2.0"
+  }
+}

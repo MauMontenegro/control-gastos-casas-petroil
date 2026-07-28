@@ -1,0 +1,3 @@
+packages:
+  - "frontend"
+  # - "backend"   # descomentar cuando se agregue el backend Node/TS
