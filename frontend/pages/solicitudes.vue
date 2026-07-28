@@ -4,6 +4,8 @@ import type { FundRequestStatus } from '~/types'
 const store = useRequestsStore()
 const { t } = useI18n()
 
+const showNewRequestModal = ref(false)
+
 onMounted(() => {
   store.fetchRequests()
 })
@@ -31,13 +33,15 @@ const approvedAmount = computed(() => store.approved.reduce((sum, r) => sum + r.
   <div>
     <div class="d-flex justify-space-between align-end flex-wrap ga-4 mb-6">
       <div>
-        <p class="text-caption font-weight-bold text-secondary text-uppercase mb-1">FONDOS</p>
-        <h1 class="text-h4 font-weight-bold mb-1">Solicitudes de fondos</h1>
+        <p class="text-caption font-weight-bold text-secondary text-uppercase mb-1">INCREMENTOS</p>
+        <h1 class="text-h4 font-weight-bold mb-1">Solicitud de incrementos</h1>
         <p class="text-body-2 text-medium-emphasis">
           Seguimiento de solicitudes, autorizaciones y origen de recursos.
         </p>
       </div>
-      <v-btn color="primary" prepend-icon="mdi-plus">{{ t('common.newRequest') }}</v-btn>
+      <v-btn color="primary" prepend-icon="mdi-plus" @click="showNewRequestModal = true">{{
+        t('common.newRequest')
+      }}</v-btn>
     </div>
 
     <v-row class="mb-2">
@@ -92,5 +96,7 @@ const approvedAmount = computed(() => store.approved.reduce((sum, r) => sum + r.
         </template>
       </v-data-table>
     </v-card>
+
+    <RequestFormDialog v-model="showNewRequestModal" />
   </div>
 </template>

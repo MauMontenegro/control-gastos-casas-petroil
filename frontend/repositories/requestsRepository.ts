@@ -1,4 +1,4 @@
-import type { FundRequest } from '~/types'
+import type { CreateFundRequestPayload, FundRequest } from '~/types'
 
 // Portado de legacy-prototype/index.html (tabla #requestsTable).
 const mockRequests: FundRequest[] = [
@@ -40,11 +40,48 @@ const mockRequests: FundRequest[] = [
   },
 ]
 
+function nextFolio(): { id: string; folio: string } {
+  const nextNumber =
+    mockRequests.reduce((max, r) => {
+      const n = Number(r.folio.split('-').pop())
+      return Number.isNaN(n) ? max : Math.max(max, n)
+    }, 0) + 1
+  const suffix = String(nextNumber).padStart(4, '0')
+  return { id: `REQ-${suffix}`, folio: `SF-${new Date().getFullYear()}-${suffix}` }
+}
+
+function formatRequiredDate(isoDate: string): string {
+  const [year, month, day] = isoDate.split('-').map(Number)
+  return new Intl.DateTimeFormat('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })
+    .format(new Date(year, month - 1, day))
+    .replace('.', '')
+}
+
 export function useRequestsRepository() {
   // TODO: reemplazar por useHttpClient().request<FundRequest[]>('/fund-requests') cuando exista el backend.
   async function getRequests(): Promise<FundRequest[]> {
     return structuredClone(mockRequests)
   }
 
-  return { getRequests }
+  // TODO: reemplazar por useHttpClient().request<FundRequest>('/fund-requests', { method: 'POST', body: payload }).
+  async function createRequest(payload: CreateFundRequestPayload): Promise<FundRequest> {
+    const { id, folio } = nextFolio()
+    const created: FundRequest = {
+      id,
+      folio,
+      requiredDate: formatRequiredDate(payload.requiredDate),
+      concept: payload.concept,
+      branch: payload.branch,
+      total: payload.amount,
+      status: 'en-revision',
+      expenseType: payload.expenseType,
+      costCenter: payload.costCenter,
+      provider: payload.provider,
+      comment: payload.comment,
+    }
+    mockRequests.unshift(created)
+    return structuredClone(created)
+  }
+
+  return { getRequests, createRequest }
 }

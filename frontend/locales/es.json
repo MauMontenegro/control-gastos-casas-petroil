@@ -12,8 +12,8 @@
   "common": {
     "loading": "Cargando...",
     "seeAll": "Ver todas",
-    "newRequest": "+ Nueva solicitud",
-    "newBranch": "+ Nueva sucursal",
+    "newRequest": "Nueva solicitud",
+    "newBranch": "Nueva sucursal",
     "export": "Exportar",
     "logout": "Cerrar sesión"
   },
@@ -27,6 +27,38 @@
     "correccion": "Corrección",
     "completo": "Completo",
     "pendiente": "Pendiente"
+  },
+  "requests": {
+    "modal": {
+      "eyebrow": "Detalle operativo",
+      "title": "Nueva solicitud de fondos",
+      "subtitle": "Captura la información principal. El folio se asignará automáticamente.",
+      "fields": {
+        "concept": "Concepto de la solicitud",
+        "conceptPlaceholder": "Selecciona un concepto...",
+        "amount": "Importe estimado",
+        "requiredDate": "Fecha requerida",
+        "branch": "Sucursal",
+        "expenseType": "Tipo de gasto",
+        "costCenter": "Centro de costo",
+        "costCenterPlaceholder": "Selecciona...",
+        "provider": "Proveedor o beneficiario",
+        "providerPlaceholder": "Selecciona un proveedor...",
+        "comment": "Comentario",
+        "commentPlaceholder": "Escribe un comentario..."
+      },
+      "errors": {
+        "concept": "Selecciona un concepto",
+        "amount": "Ingresa un importe válido",
+        "requiredDate": "Selecciona una fecha",
+        "branch": "Selecciona una sucursal",
+        "expenseType": "Selecciona un tipo de gasto",
+        "costCenter": "Selecciona un centro de costo",
+        "provider": "Selecciona un proveedor"
+      },
+      "cancel": "Cancelar",
+      "submit": "Crear solicitud"
+    }
   },
   "dashboard": {
     "eyebrow": "CENTRO DE TRABAJO",
