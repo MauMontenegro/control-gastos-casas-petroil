@@ -1,5 +1,5 @@
 import { useRequestsRepository } from '~/repositories/requestsRepository'
-import type { FundRequest } from '~/types'
+import type { CreateFundRequestPayload, FundRequest } from '~/types'
 
 export const useRequestsStore = defineStore('requests', () => {
   const items = ref<FundRequest[]>([])
@@ -22,5 +22,11 @@ export const useRequestsStore = defineStore('requests', () => {
     }
   }
 
-  return { items, loading, error, pending, approved, rejected, fetchRequests }
+  async function createRequest(payload: CreateFundRequestPayload) {
+    const created = await useRequestsRepository().createRequest(payload)
+    items.value.unshift(created)
+    return created
+  }
+
+  return { items, loading, error, pending, approved, rejected, fetchRequests, createRequest }
 })
