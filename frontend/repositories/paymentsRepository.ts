@@ -1,4 +1,5 @@
 import type { CreatePaymentPayload, Payment } from '~/types'
+import { useRequestsRepository } from '~/repositories/requestsRepository'
 
 // Portado de legacy-prototype/app.js (const payments).
 const mockPayments: Payment[] = [
@@ -11,6 +12,7 @@ const mockPayments: Payment[] = [
     amount: 42650,
     variationPct: 8,
     status: 'listo',
+    proofStatus: 'sin-cargar',
   },
   {
     id: 'PAY-0002',
@@ -21,6 +23,7 @@ const mockPayments: Payment[] = [
     amount: 8920,
     variationPct: 22,
     status: 'variacion',
+    proofStatus: 'sin-cargar',
   },
   {
     id: 'PAY-0003',
@@ -30,7 +33,8 @@ const mockPayments: Payment[] = [
     dueDate: '23 jul 2026',
     amount: 5480,
     variationPct: -2,
-    status: 'listo',
+    status: 'pagado',
+    proofStatus: 'cargada',
   },
   {
     id: 'PAY-0004',
@@ -40,7 +44,8 @@ const mockPayments: Payment[] = [
     dueDate: '25 jul 2026',
     amount: 19380,
     variationPct: 4,
-    status: 'listo',
+    status: 'pagado',
+    proofStatus: 'cargada',
   },
   {
     id: 'PAY-0005',
@@ -51,6 +56,7 @@ const mockPayments: Payment[] = [
     amount: 6240,
     variationPct: 1,
     status: 'falta-recibo',
+    proofStatus: 'sin-cargar',
   },
   {
     id: 'PAY-0006',
@@ -60,17 +66,38 @@ const mockPayments: Payment[] = [
     dueDate: '29 jul 2026',
     amount: 33860,
     variationPct: 12,
-    status: 'variacion',
+    status: 'pagado',
+    proofStatus: 'cargada',
   },
 ]
 
 export function usePaymentsRepository() {
   // TODO: reemplazar por useHttpClient().request<Payment[]>('/payments') cuando exista el backend.
   async function getPayments(): Promise<Payment[]> {
-    return structuredClone(mockPayments)
+    const requests = await useRequestsRepository().getRequests()
+    const authorizedFolios = new Set(
+      requests.filter((request) => request.status === 'autorizada').map((request) => request.folio),
+    )
+
+    return structuredClone(
+      mockPayments.filter(
+        (payment) =>
+          payment.requestFolio !== null && authorizedFolios.has(payment.requestFolio),
+      ),
+    )
   }
 
   async function createPayment(payload: CreatePaymentPayload): Promise<Payment> {
+    const requests = await useRequestsRepository().getRequests()
+    const approvedRequest = requests.some(
+      (request) =>
+        request.folio === payload.approvedRequestFolio && request.status === 'autorizada',
+    )
+
+    if (!approvedRequest) {
+      throw new Error('La solicitud debe estar autorizada antes de registrarse como pago')
+    }
+
     const created: Payment = {
       id: `PAY-${Math.floor(Math.random() * 9000 + 1000)}`,
       requestFolio: payload.approvedRequestFolio,
@@ -80,6 +107,7 @@ export function usePaymentsRepository() {
       amount: payload.amount,
       variationPct: 0,
       status: 'pagado',
+      proofStatus: 'sin-cargar',
     }
     mockPayments.unshift(created)
     return created

@@ -1,4 +1,5 @@
 export type PaymentStatus = 'listo' | 'variacion' | 'falta-recibo' | 'pagado'
+export type PaymentProofStatus = 'sin-cargar' | 'cargada'
 
 export interface Payment {
   id: string
@@ -9,6 +10,7 @@ export interface Payment {
   amount: number
   variationPct: number
   status: PaymentStatus
+  proofStatus: PaymentProofStatus
   /** Permite mostrar un importe programado aun antes de capturar una solicitud. */
   isFixed?: boolean
 }
