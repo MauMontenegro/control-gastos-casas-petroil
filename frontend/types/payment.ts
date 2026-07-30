@@ -9,6 +9,8 @@ export interface Payment {
   amount: number
   variationPct: number
   status: PaymentStatus
+  /** Permite mostrar un importe programado aun antes de capturar una solicitud. */
+  isFixed?: boolean
 }
 
 export interface CreatePaymentPayload {
