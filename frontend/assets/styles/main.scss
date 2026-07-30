@@ -1,5 +1,30 @@
 @use './variables' as *;
 
+// Transición compartida al navegar entre las pestañas principales.
+.page-enter-active,
+.page-leave-active {
+  transition:
+    opacity 180ms ease,
+    transform 220ms ease;
+}
+
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter-active,
+  .page-leave-active {
+    transition: none;
+  }
+}
+
 // Piezas a medida sin equivalente directo en Vuetify (ver plan de fidelidad
 // visual): sidebar de marca, KPI cards con badge de icono, donut de
 // presupuesto, grilla de calendario y filter-chips tipo píldora.
