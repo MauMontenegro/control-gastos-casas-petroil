@@ -1,6 +1,8 @@
 # Dependencies
 node_modules/
 .pnpm-store/
+.tools/
+.local-export/
 
 # Nuxt
 frontend/.nuxt/
