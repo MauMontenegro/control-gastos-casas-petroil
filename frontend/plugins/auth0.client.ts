@@ -13,4 +13,13 @@ export default defineNuxtPlugin((nuxtApp) => {
   })
 
   nuxtApp.vueApp.use(auth0)
+
+  // Se expone también vía provide de Nuxt (no solo el provide/inject de Vue):
+  // useAuth0() usa inject() y requiere una instancia de componente activa, lo
+  // que falla en código que corre fuera de setup() (p.ej. dentro de un watch()
+  // que se dispara de forma asíncrona, como en httpClient.ts). useNuxtApp()
+  // sí funciona en esos contextos.
+  return {
+    provide: { auth0 },
+  }
 })
