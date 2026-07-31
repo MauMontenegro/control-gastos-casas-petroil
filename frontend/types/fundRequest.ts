@@ -14,13 +14,18 @@ export interface FundRequest {
   comment?: string
 }
 
-export interface CreateFundRequestPayload {
+export interface CreateFundRequestConceptItem {
   concept: string
   amount: number
+  document: File
+}
+
+export interface CreateFundRequestPayload {
   requiredDate: string
   branch: string
+  card: string
   expenseType: string
-  costCenter: string
   provider: string
   comment?: string
+  concepts: CreateFundRequestConceptItem[]
 }
