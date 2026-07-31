@@ -273,20 +273,15 @@ function selectDay(day: CalendarDay) {
 
 <template>
   <div class="calendar-page">
-    <div class="d-flex justify-space-between align-end flex-wrap ga-4 mb-4">
+    <header class="calendar-heading">
       <div>
-        <p class="text-caption font-weight-bold text-secondary text-uppercase mb-1">
-          AGENDA OPERATIVA
-        </p>
-        <h1 class="text-h4 font-weight-bold mb-1">Calendario de pagos y vencimientos</h1>
-        <p class="text-body-2 text-medium-emphasis">
-          Anticipa cortes de servicios y concentra la operación en el viernes anterior.
-        </p>
+        <h1>Calendario de pagos y vencimientos</h1>
+        <span>Anticipa vencimientos y organiza los pagos del periodo.</span>
       </div>
-      <v-btn color="primary" prepend-icon="mdi-calendar-today" variant="flat" @click="goToToday">
+      <v-btn class="today-button" prepend-icon="mdi-calendar-today" variant="flat" @click="goToToday">
         Ir a hoy
       </v-btn>
-    </div>
+    </header>
 
     <v-alert v-if="store.error" type="error" variant="tonal" class="mb-4">
       {{ store.error }}
@@ -371,7 +366,7 @@ function selectDay(day: CalendarDay) {
 
           <div
             class="calendar-grid"
-            :style="{ gridTemplateRows: `repeat(${weekCount}, minmax(82px, 1fr))` }"
+            :style="{ gridTemplateRows: `repeat(${weekCount}, minmax(68px, 1fr))` }"
           >
             <button
               v-for="day in calendarDays"
@@ -551,11 +546,75 @@ function selectDay(day: CalendarDay) {
 <style scoped>
 .calendar-page {
   --calendar-border: rgba(var(--v-border-color), 0.14);
+  --petroil-blue: #075f99;
+  --petroil-blue-dark: #123c56;
+  --petroil-cyan: #1594bf;
+  --petroil-orange: #ff791f;
+  --petroil-yellow: #f5ba24;
+
+  min-height: calc(100vh - 126px);
+  margin: -24px;
+  padding: 16px 24px 24px;
+  background: #eaf5fa;
+  color: #0c2f4d;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.calendar-heading {
+  position: relative;
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 10px;
+  padding-left: 18px;
+}
+
+.calendar-heading::before {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 0;
+  width: 5px;
+  border-radius: 99px;
+  background: linear-gradient(180deg, #ff963e, #ff6f1a);
+  box-shadow: 0 3px 9px rgb(255 111 26 / 22%);
+  content: '';
+}
+
+.calendar-heading h1 {
+  margin: 0;
+  color: #123c56;
+  font-size: clamp(1.28rem, 1.8vw, 1.6rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.calendar-heading span {
+  display: block;
+  margin-top: 3px;
+  color: #607b8d;
+  font-size: 0.8rem;
+}
+
+.today-button {
+  min-height: 36px;
+  border-radius: 8px !important;
+  background: linear-gradient(135deg, #ff8a2b, #f36b1b) !important;
+  box-shadow: 0 5px 12px rgb(243 107 27 / 22%);
+  color: #fff !important;
+  font-size: 0.75rem;
+  font-weight: 700;
 }
 
 .calendar-shell {
-  border: 1px solid var(--calendar-border);
+  border: 1px solid #d5e6ee;
+  border-top: 4px solid #1685b3;
+  border-radius: 14px !important;
   overflow: hidden;
+  background: rgb(255 255 255 / 94%);
   box-shadow:
     0 12px 32px rgba(var(--v-theme-secondary), 0.07),
     0 2px 8px rgba(var(--v-theme-on-surface), 0.04);
@@ -566,17 +625,30 @@ function selectDay(day: CalendarDay) {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 18px 20px;
-  background:
-    linear-gradient(110deg, rgba(var(--v-theme-primary), 0.055), transparent 42%),
-    rgb(var(--v-theme-surface));
+  padding: 9px 14px;
+  background: linear-gradient(110deg, #dceef6, #f4f9fb 68%);
   border-bottom: 1px solid var(--calendar-border);
 }
 
+.calendar-toolbar :deep(.v-btn) {
+  color: var(--petroil-blue);
+}
+
+.calendar-filters :deep(.v-field) {
+  border-radius: 8px;
+  background: rgb(255 255 255 / 88%);
+  color: var(--petroil-blue-dark);
+}
+
+.calendar-filters :deep(.v-field--focused) {
+  box-shadow: 0 0 0 2px rgb(7 95 153 / 12%);
+}
+
 .month-title {
-  min-width: 180px;
-  font-size: 1.25rem;
-  font-weight: 800;
+  min-width: 160px;
+  color: #123c56;
+  font-size: 1rem;
+  font-weight: 700;
   text-align: center;
   text-transform: capitalize;
 }
@@ -602,10 +674,10 @@ function selectDay(day: CalendarDay) {
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
-  padding: 10px 20px;
+  padding: 7px 18px;
   color: rgba(var(--v-theme-on-surface), 0.65);
   font-size: 0.75rem;
-  background: rgba(var(--v-theme-on-surface), 0.012);
+  background: #f8fbfc;
   border-bottom: 1px solid var(--calendar-border);
 }
 
@@ -622,15 +694,15 @@ function selectDay(day: CalendarDay) {
 }
 
 .legend-dot.due {
-  background: rgb(var(--v-theme-secondary));
+  background: var(--petroil-orange);
 }
 
 .legend-dot.payday {
-  background: rgb(var(--v-theme-primary));
+  background: var(--petroil-blue);
 }
 
 .legend-dot.attention {
-  background: rgb(var(--v-theme-warning));
+  background: var(--petroil-yellow);
 }
 
 .calendar-layout {
@@ -653,19 +725,19 @@ function selectDay(day: CalendarDay) {
 }
 
 .calendar-grid {
-  height: clamp(480px, calc(100vh - 290px), 650px);
+  height: clamp(410px, calc(100vh - 365px), 650px);
 }
 
 .calendar-weekdays {
-  min-height: 38px;
+  min-height: 32px;
   background:
-    linear-gradient(90deg, rgba(var(--v-theme-primary), 0.1), rgba(var(--v-theme-secondary), 0.06)),
-    rgb(var(--v-theme-surface));
+    linear-gradient(90deg, #d8edf6, #eef6fa 65%, #fff7e7),
+    #fff;
   border-bottom: 1px solid var(--calendar-border);
 }
 
 .calendar-weekdays div {
-  padding: 10px 8px;
+  padding: 7px 8px;
   color: rgba(var(--v-theme-on-surface), 0.6);
   font-size: 0.7rem;
   font-weight: 800;
@@ -675,8 +747,8 @@ function selectDay(day: CalendarDay) {
 }
 
 .calendar-weekdays div:nth-child(5) {
-  color: rgb(var(--v-theme-primary));
-  background: rgba(var(--v-theme-primary), 0.08);
+  color: #d65d10;
+  background: #fff0e5;
 }
 
 .calendar-weekdays div:nth-child(6),
@@ -687,7 +759,7 @@ function selectDay(day: CalendarDay) {
 .calendar-day {
   position: relative;
   min-height: 0;
-  padding: 6px 7px;
+  padding: 4px 6px;
   overflow: hidden;
   color: rgb(var(--v-theme-on-surface));
   text-align: left;
@@ -708,8 +780,8 @@ function selectDay(day: CalendarDay) {
 
 .calendar-day:hover {
   z-index: 1;
-  background: rgba(var(--v-theme-primary), 0.065);
-  box-shadow: inset 0 0 0 1px rgba(var(--v-theme-primary), 0.25);
+  background: #eef8fc;
+  box-shadow: inset 0 0 0 1px rgb(21 148 191 / 35%);
   transform: translateY(-1px);
 }
 
@@ -720,19 +792,18 @@ function selectDay(day: CalendarDay) {
 
 .calendar-day.is-friday {
   background:
-    linear-gradient(180deg, rgba(var(--v-theme-primary), 0.11), transparent 68%),
-    rgb(var(--v-theme-surface));
-  border-top: 2px solid rgba(var(--v-theme-primary), 0.42);
+    linear-gradient(180deg, #fff4e9, transparent 72%),
+    #fff;
+  border-top: 2px solid var(--petroil-orange);
 }
 
 .calendar-day.is-selected {
   z-index: 2;
   background:
-    linear-gradient(145deg, rgba(var(--v-theme-primary), 0.12), transparent 62%),
-    rgb(var(--v-theme-surface));
+    linear-gradient(145deg, #e1f2f9, #fff 68%);
   box-shadow:
-    inset 0 0 0 2px rgb(var(--v-theme-primary)),
-    0 7px 18px rgba(var(--v-theme-primary), 0.11);
+    inset 0 0 0 2px var(--petroil-blue),
+    0 7px 18px rgb(7 95 153 / 13%);
 }
 
 .day-heading {
@@ -744,8 +815,8 @@ function selectDay(day: CalendarDay) {
 
 .day-number {
   display: grid;
-  width: 26px;
-  height: 26px;
+  width: 23px;
+  height: 23px;
   place-items: center;
   font-size: 0.78rem;
   font-weight: 700;
@@ -753,12 +824,12 @@ function selectDay(day: CalendarDay) {
 }
 
 .is-today .day-number {
-  color: rgb(var(--v-theme-on-primary));
-  background: rgb(var(--v-theme-primary));
+  color: #fff;
+  background: var(--petroil-blue);
 }
 
 .today-label {
-  color: rgb(var(--v-theme-primary));
+  color: var(--petroil-orange);
   font-size: 0.58rem;
   font-weight: 900;
   letter-spacing: 0.08em;
@@ -769,7 +840,7 @@ function selectDay(day: CalendarDay) {
   align-items: center;
   gap: 4px;
   margin-bottom: 3px;
-  color: rgb(var(--v-theme-primary));
+  color: #d65d10;
   font-size: 0.65rem;
   font-weight: 800;
 }
@@ -785,8 +856,8 @@ function selectDay(day: CalendarDay) {
   gap: 4px;
   padding: 3px 5px;
   margin-bottom: 3px;
-  color: rgb(var(--v-theme-on-primary-container));
-  background: rgba(var(--v-theme-primary), 0.12);
+  color: var(--petroil-blue-dark);
+  background: #e2f2f8;
   border-radius: 6px;
 }
 
@@ -814,8 +885,8 @@ function selectDay(day: CalendarDay) {
   padding: 3px 5px;
   font-size: 0.61rem;
   line-height: 1.2;
-  background: rgba(var(--v-theme-secondary), 0.1);
-  border-left: 3px solid rgb(var(--v-theme-secondary));
+  background: #fff1e7;
+  border-left: 3px solid var(--petroil-orange);
   border-radius: 4px;
   transition:
     transform 0.15s ease,
@@ -871,8 +942,8 @@ function selectDay(day: CalendarDay) {
 
 .selected-payday {
   padding: 14px;
-  background: rgba(var(--v-theme-primary), 0.09);
-  border: 1px solid rgba(var(--v-theme-primary), 0.18);
+  background: linear-gradient(135deg, #e6f4f9, #fff8e8);
+  border: 1px solid #bcdce9;
   border-radius: 10px;
 }
 
@@ -990,10 +1061,9 @@ function selectDay(day: CalendarDay) {
 
 .detail-dialog-header {
   flex: 0 0 auto;
-  padding: 14px;
+  padding: 10px 12px;
   background:
-    linear-gradient(120deg, rgba(var(--v-theme-primary), 0.11), transparent 55%),
-    rgb(var(--v-theme-surface));
+    linear-gradient(120deg, #dceef6, #fff 60%);
   border-bottom: 1px solid rgba(var(--v-theme-primary), 0.12);
 }
 
@@ -1003,7 +1073,7 @@ function selectDay(day: CalendarDay) {
   height: 44px;
   color: rgb(var(--v-theme-on-primary));
   text-align: center;
-  background: rgb(var(--v-theme-primary));
+  background: linear-gradient(145deg, var(--petroil-blue), #087eb2);
   border-radius: 10px;
   box-shadow: 0 7px 18px rgba(var(--v-theme-primary), 0.24);
   place-content: center;
@@ -1025,7 +1095,7 @@ function selectDay(day: CalendarDay) {
 .detail-dialog-content {
   flex: 1 1 auto;
   min-height: 0;
-  padding: 14px;
+  padding: 11px 12px;
   overflow-y: auto;
 }
 
@@ -1035,7 +1105,7 @@ function selectDay(day: CalendarDay) {
 }
 
 .day-panel {
-  height: calc(clamp(480px, calc(100vh - 290px), 650px) + 38px);
+  height: calc(clamp(410px, calc(100vh - 365px), 650px) + 32px);
   min-width: 0;
 }
 
