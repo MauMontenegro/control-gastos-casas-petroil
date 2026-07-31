@@ -292,13 +292,13 @@ function markProofAsUploaded() {
 
 .payments-page-header::before {
   position: absolute;
-  top: 10px;
+  top: 12px;
   bottom: 16px;
   left: 2px;
-  width: 4px;
+  width: 5px;
   border-radius: 999px;
-  background: linear-gradient(180deg, #ff8a35, #f36a21);
-  box-shadow: 0 0 12px rgb(243 106 33 / 22%);
+  background: linear-gradient(180deg, #ff963e, #ff6f1a);
+  box-shadow: 0 3px 9px rgb(255 111 26 / 22%);
   content: '';
 }
 
@@ -316,7 +316,10 @@ function markProofAsUploaded() {
   --payments-text-size: 0.82rem;
 
   position: relative;
-  min-height: 100%;
+  min-height: calc(100vh - 126px);
+  margin: -24px;
+  padding: 18px 24px 24px;
+  background: #eaf5fa;
   color: #172b3a;
   font-family: Arial, Helvetica, sans-serif;
   isolation: isolate;
@@ -361,7 +364,7 @@ function markProofAsUploaded() {
 .payments-page-header__copy span {
   display: block;
   margin-top: 5px;
-  color: #687784;
+  color: #506f82;
   font-size: 0.8rem;
 }
 
@@ -437,6 +440,7 @@ function markProofAsUploaded() {
   border: 1px solid #b9d9e9;
   border-radius: 14px !important;
   background: #fff;
+  border-top: 4px solid #e9b224;
   box-shadow:
     0 8px 24px rgb(28 52 68 / 6%),
     0 0 0 3px rgb(8 126 184 / 4%) !important;

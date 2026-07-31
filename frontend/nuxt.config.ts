@@ -11,6 +11,7 @@ export default defineNuxtConfig({
   experimental: { appManifest: false },
 
   app: {
+    pageTransition: { name: 'page', mode: 'out-in' },
     head: {
       title: 'Control de Gastos | Petroil',
       htmlAttrs: { lang: 'es' },
