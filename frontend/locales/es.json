@@ -7,7 +7,8 @@
     "limpieza": "Limpieza",
     "comprobaciones": "Comprobaciones",
     "reportes": "Dashboards",
-    "sucursales": "Casas Petroil"
+    "sucursales": "Casas Petroil",
+    "configuracionRpa": "Configuración RPA"
   },
   "common": {
     "loading": "Cargando...",

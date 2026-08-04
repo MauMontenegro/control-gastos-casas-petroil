@@ -118,6 +118,14 @@ function formatFullDate(date: Date): string {
   }).format(date)
 }
 
+function formatPanelDate(date: Date): string {
+  return new Intl.DateTimeFormat('es-MX', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  }).format(date)
+}
+
 const serviceOptions = computed(() => [
   'Todos',
   ...new Set([...serviceCatalog, ...store.items.map((payment) => payment.service)]),
@@ -366,7 +374,7 @@ function selectDay(day: CalendarDay) {
 
           <div
             class="calendar-grid"
-            :style="{ gridTemplateRows: `repeat(${weekCount}, minmax(68px, 1fr))` }"
+            :style="{ gridTemplateRows: `repeat(${weekCount}, minmax(54px, 1fr))` }"
           >
             <button
               v-for="day in calendarDays"
@@ -430,7 +438,7 @@ function selectDay(day: CalendarDay) {
               <small>{{ monthNames[selectedDay.date.getMonth()].slice(0, 3) }}</small>
             </div>
           </template>
-          <v-card-title class="text-capitalize">{{ formatFullDate(selectedDay.date) }}</v-card-title>
+          <v-card-title class="text-capitalize">{{ formatPanelDate(selectedDay.date) }}</v-card-title>
           <v-card-subtitle>Detalle operativo del calendario</v-card-subtitle>
         </v-card-item>
 
@@ -438,18 +446,25 @@ function selectDay(day: CalendarDay) {
 
         <v-card-text class="detail-dialog-content">
           <div v-if="selectedDay.isFriday" class="selected-payday">
-            <div class="d-flex align-center ga-2 mb-2">
-              <v-icon icon="mdi-wallet-outline" color="primary" />
-              <strong>Jornada de pagos</strong>
-            </div>
-            <div class="d-flex justify-space-between align-end">
-              <span class="text-caption text-medium-emphasis">
-                {{ selectedDay.paymentBatch.length }} compromisos
+            <div class="selected-payday__heading">
+              <span class="selected-payday__icon">
+                <v-icon icon="mdi-wallet-outline" size="18" />
               </span>
-              <strong v-if="selectedBatchTotal" class="text-h6 text-primary">
-                {{ formatCurrency(selectedBatchTotal) }}
-              </strong>
-              <strong v-else class="text-body-2 text-primary">Monto por capturar</strong>
+              <div>
+                <strong>Jornada de pagos</strong>
+                <small>Preparación semanal</small>
+              </div>
+            </div>
+            <div class="selected-payday__summary">
+              <div>
+                <span>Compromisos</span>
+                <strong>{{ selectedDay.paymentBatch.length }}</strong>
+              </div>
+              <div class="selected-payday__amount">
+                <span>Monto programado</span>
+                <strong v-if="selectedBatchTotal">{{ formatCurrency(selectedBatchTotal) }}</strong>
+                <strong v-else>Por capturar</strong>
+              </div>
             </div>
             <div v-if="selectedPendingCaptureCount" class="capture-note">
               {{ selectedPendingCaptureCount }} importe{{
@@ -517,7 +532,9 @@ function selectDay(day: CalendarDay) {
             v-if="!selectedDay.paymentBatch.length && !selectedDay.payments.length"
             class="empty-day"
           >
-            <v-icon icon="mdi-calendar-blank-outline" size="42" color="primary" />
+            <span class="empty-day__icon">
+              <v-icon icon="mdi-calendar-blank-outline" size="28" />
+            </span>
             <strong>Sin compromisos registrados</strong>
             <span>
               {{
@@ -530,8 +547,10 @@ function selectDay(day: CalendarDay) {
         </v-card-text>
 
         <v-divider />
-        <v-card-actions class="px-5 py-3">
-          <v-icon icon="mdi-information-outline" color="info" size="18" />
+        <v-card-actions class="detail-dialog-footer">
+          <span class="detail-dialog-footer__icon">
+            <v-icon icon="mdi-information-outline" size="16" />
+          </span>
           <span class="dialog-rule">
             Los vencimientos se preparan el viernes anterior para evitar pagos fuera de fecha.
           </span>
@@ -558,6 +577,15 @@ function selectDay(day: CalendarDay) {
   background: #eaf5fa;
   color: #0c2f4d;
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.calendar-page :deep(.v-btn),
+.calendar-page :deep(.v-field),
+.calendar-page :deep(.v-chip),
+.calendar-page :deep(.v-card),
+.calendar-page :deep(.v-card-title),
+.calendar-page :deep(.v-card-subtitle) {
+  font-family: Arial, Helvetica, sans-serif !important;
 }
 
 .calendar-heading {
@@ -601,18 +629,27 @@ function selectDay(day: CalendarDay) {
 
 .today-button {
   min-height: 36px;
+  padding-inline: 17px !important;
   border-radius: 8px !important;
   background: linear-gradient(135deg, #ff8a2b, #f36b1b) !important;
   box-shadow: 0 5px 12px rgb(243 107 27 / 22%);
   color: #fff !important;
   font-size: 0.75rem;
   font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.today-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 17px rgb(243 107 27 / 28%);
 }
 
 .calendar-shell {
   border: 1px solid #d5e6ee;
   border-top: 4px solid #1685b3;
-  border-radius: 14px !important;
+  border-radius: 18px !important;
   overflow: hidden;
   background: rgb(255 255 255 / 94%);
   box-shadow:
@@ -624,9 +661,9 @@ function selectDay(day: CalendarDay) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 9px 14px;
-  background: linear-gradient(110deg, #dceef6, #f4f9fb 68%);
+  gap: 9px;
+  padding: 6px 11px;
+  background: #d5eaf3;
   border-bottom: 1px solid var(--calendar-border);
 }
 
@@ -634,10 +671,47 @@ function selectDay(day: CalendarDay) {
   color: var(--petroil-blue);
 }
 
+.calendar-toolbar > div:first-child :deep(.v-btn--icon) {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #c5dce7;
+  border-radius: 9px;
+  background: rgb(255 255 255 / 72%);
+  box-shadow: none;
+}
+
+.calendar-toolbar > div:first-child :deep(.v-btn--icon:hover) {
+  border-color: #82b5cc;
+  background: #fff;
+}
+
 .calendar-filters :deep(.v-field) {
+  min-height: 34px;
   border-radius: 8px;
   background: rgb(255 255 255 / 88%);
   color: var(--petroil-blue-dark);
+}
+
+.calendar-filters :deep(.v-field__input) {
+  min-height: 34px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  font-size: 0.74rem;
+  font-weight: 500;
+}
+
+.calendar-filters :deep(.v-label) {
+  color: #668296;
+  font-size: 0.68rem;
+}
+
+.calendar-filters > :deep(.v-btn) {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #c8dce7;
+  border-radius: 9px;
+  background: #edf6fa;
+  box-shadow: none;
 }
 
 .calendar-filters :deep(.v-field--focused) {
@@ -645,38 +719,42 @@ function selectDay(day: CalendarDay) {
 }
 
 .month-title {
-  min-width: 160px;
+  min-width: 132px;
   color: #123c56;
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 0.9rem;
+  font-weight: 600;
   text-align: center;
   text-transform: capitalize;
 }
 
 .month-title span {
   color: rgba(var(--v-theme-on-surface), 0.55);
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .calendar-filters {
   display: grid;
-  grid-template-columns: repeat(2, minmax(145px, 180px)) auto;
-  gap: 12px;
+  grid-template-columns: repeat(2, minmax(120px, 154px)) auto;
+  gap: 7px;
   align-items: center;
 }
 
 .month-count {
-  margin-left: 6px;
-  font-weight: 700;
+  margin-left: 3px;
+  border: 1px solid #f1ddc8;
+  background: #fff4e9 !important;
+  color: #d86618 !important;
+  font-size: 0.68rem;
+  font-weight: 600;
 }
 
 .calendar-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
-  padding: 7px 18px;
+  gap: 15px;
+  padding: 5px 15px;
   color: rgba(var(--v-theme-on-surface), 0.65);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   background: #f8fbfc;
   border-bottom: 1px solid var(--calendar-border);
 }
@@ -707,15 +785,14 @@ function selectDay(day: CalendarDay) {
 
 .calendar-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 292px;
-  background:
-    radial-gradient(circle at 82% 8%, rgba(var(--v-theme-primary), 0.055), transparent 26%),
-    rgb(var(--v-theme-surface));
+  grid-template-columns: minmax(0, 1fr) minmax(238px, 270px);
+  background: #d5eaf3;
 }
 
 .calendar-grid-wrap {
   min-width: 0;
-  border-right: 1px solid var(--calendar-border);
+  border-right: 1px solid #c9dfe9;
+  background: #d5eaf3;
 }
 
 .calendar-weekdays,
@@ -725,22 +802,26 @@ function selectDay(day: CalendarDay) {
 }
 
 .calendar-grid {
-  height: clamp(410px, calc(100vh - 365px), 650px);
+  height: clamp(390px, calc(100vh - 350px), 625px);
+  gap: 3px;
+  padding: 4px;
+  background: #d5eaf3;
 }
 
 .calendar-weekdays {
   min-height: 32px;
-  background:
-    linear-gradient(90deg, #d8edf6, #eef6fa 65%, #fff7e7),
-    #fff;
+  gap: 3px;
+  padding: 4px;
+  background: #d5eaf3;
   border-bottom: 1px solid var(--calendar-border);
 }
 
 .calendar-weekdays div {
-  padding: 7px 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
   color: rgba(var(--v-theme-on-surface), 0.6);
   font-size: 0.7rem;
-  font-weight: 800;
+  font-weight: 700;
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -759,57 +840,73 @@ function selectDay(day: CalendarDay) {
 .calendar-day {
   position: relative;
   min-height: 0;
-  padding: 4px 6px;
+  padding: 5px 7px;
   overflow: hidden;
   color: rgb(var(--v-theme-on-surface));
   text-align: left;
-  background: rgb(var(--v-theme-surface));
-  border: 0;
-  border-right: 1px solid var(--calendar-border);
-  border-bottom: 1px solid var(--calendar-border);
+  background: rgb(255 255 255 / 92%);
+  border: 1px solid #d4e3ea;
+  border-radius: 10px;
   cursor: pointer;
   transition:
-    background 0.15s ease,
-    box-shadow 0.15s ease,
-    transform 0.15s ease;
+    background 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
 }
 
 .calendar-day:nth-child(7n) {
-  border-right: 0;
+  border-right: 1px solid #d4e3ea;
 }
 
 .calendar-day:hover {
-  z-index: 1;
-  background: #eef8fc;
-  box-shadow: inset 0 0 0 1px rgb(21 148 191 / 35%);
-  transform: translateY(-1px);
+  z-index: 3;
+  border-color: #72b4d0;
+  background: #fff;
+  box-shadow: 0 8px 18px rgb(7 95 153 / 15%);
+  transform: translateY(-3px);
 }
 
 .calendar-day.is-outside {
   color: rgba(var(--v-theme-on-surface), 0.32);
-  background: rgba(var(--v-theme-on-surface), 0.018);
+  border-color: rgb(210 227 235 / 58%);
+  background: rgb(244 249 251 / 62%);
+  box-shadow: none;
 }
 
 .calendar-day.is-friday {
   background:
-    linear-gradient(180deg, #fff4e9, transparent 72%),
-    #fff;
-  border-top: 2px solid var(--petroil-orange);
+    linear-gradient(155deg, #fff3e8, #fff 72%);
+  border-color: #f3c39f;
+  box-shadow: inset 0 3px 0 var(--petroil-orange);
 }
 
 .calendar-day.is-selected {
   z-index: 2;
-  background:
-    linear-gradient(145deg, #e1f2f9, #fff 68%);
+  overflow: hidden;
+  border-color: #0872a5;
+  background: linear-gradient(145deg, #cfeaf6, #eaf6fb 58%, #fff 100%);
   box-shadow:
-    inset 0 0 0 2px var(--petroil-blue),
-    0 7px 18px rgb(7 95 153 / 13%);
+    0 0 0 2px rgb(7 95 153 / 13%),
+    0 10px 22px rgb(7 95 153 / 22%);
+  transform: translateY(-2px);
+}
+
+.calendar-day.is-selected::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #075f99, #1594bf);
+  content: '';
 }
 
 .day-heading {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 7px;
   margin-bottom: 3px;
 }
 
@@ -819,30 +916,39 @@ function selectDay(day: CalendarDay) {
   height: 23px;
   place-items: center;
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 600;
   border-radius: 50%;
 }
 
 .is-today .day-number {
   color: #fff;
   background: var(--petroil-blue);
+  box-shadow: 0 4px 10px rgb(7 95 153 / 24%);
 }
 
 .today-label {
+  padding: 2px 5px;
+  border-radius: 99px;
   color: var(--petroil-orange);
   font-size: 0.58rem;
   font-weight: 900;
   letter-spacing: 0.08em;
+  background: #fff0e6;
 }
 
 .payday-banner {
   display: flex;
   align-items: center;
   gap: 4px;
-  margin-bottom: 3px;
+  width: fit-content;
+  padding: 3px 6px;
+  margin-bottom: 4px;
+  border: 1px solid #f4d2b9;
+  border-radius: 7px;
+  background: rgb(255 245 236 / 88%);
   color: #d65d10;
   font-size: 0.65rem;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .is-selected .payday-banner {
@@ -858,7 +964,8 @@ function selectDay(day: CalendarDay) {
   margin-bottom: 3px;
   color: var(--petroil-blue-dark);
   background: #e2f2f8;
-  border-radius: 6px;
+  border: 1px solid #c8e2ed;
+  border-radius: 8px;
 }
 
 .batch-summary strong {
@@ -887,7 +994,7 @@ function selectDay(day: CalendarDay) {
   line-height: 1.2;
   background: #fff1e7;
   border-left: 3px solid var(--petroil-orange);
-  border-radius: 4px;
+  border-radius: 7px;
   transition:
     transform 0.15s ease,
     box-shadow 0.15s ease;
@@ -941,10 +1048,91 @@ function selectDay(day: CalendarDay) {
 }
 
 .selected-payday {
-  padding: 14px;
-  background: linear-gradient(135deg, #e6f4f9, #fff8e8);
+  overflow: hidden;
+  padding: 12px;
   border: 1px solid #bcdce9;
-  border-radius: 10px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #e8f5fa, #fff 58%, #fff7e8);
+  box-shadow: 0 6px 14px rgb(7 95 153 / 7%);
+}
+
+.selected-payday__heading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 11px;
+}
+
+.selected-payday__heading > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.selected-payday__heading strong {
+  color: #123c56;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.selected-payday__heading small {
+  margin-top: 1px;
+  color: #718797;
+  font-size: 0.59rem;
+}
+
+.selected-payday__icon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  border-radius: 9px;
+  place-items: center;
+  background: linear-gradient(145deg, #ff8a2b, #f36b1b);
+  box-shadow: 0 5px 10px rgb(243 107 27 / 18%);
+  color: #fff;
+}
+
+.selected-payday__summary {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 7px;
+}
+
+.selected-payday__summary > div {
+  display: flex;
+  min-width: 0;
+  min-height: 55px;
+  padding: 8px 9px;
+  flex-direction: column;
+  justify-content: center;
+  border: 1px solid #d0e5ee;
+  border-radius: 9px;
+  background: rgb(255 255 255 / 78%);
+}
+
+.selected-payday__summary span {
+  overflow: hidden;
+  color: #718797;
+  font-size: 0.58rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selected-payday__summary strong {
+  overflow: hidden;
+  margin-top: 3px;
+  color: #075f99;
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selected-payday__amount strong {
+  color: #df681a;
+  font-size: 0.74rem;
 }
 
 .capture-note {
@@ -1033,20 +1221,38 @@ function selectDay(day: CalendarDay) {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 44px 12px;
+  gap: 7px;
+  padding: 22px 12px;
+  margin-top: 11px;
+  border: 1px dashed #c7dfe9;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #f7fbfc, #fff);
   color: rgba(var(--v-theme-on-surface), 0.55);
   text-align: center;
 }
 
 .empty-day strong {
   color: rgb(var(--v-theme-on-surface));
-  font-size: 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.empty-day__icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 3px;
+  border-radius: 14px;
+  place-items: center;
+  background: #fff0e6;
+  box-shadow: inset 0 0 0 1px #f7d8c3;
+  color: #ff791f;
 }
 
 .empty-day span {
   max-width: 240px;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
+  line-height: 1.45;
 }
 
 .detail-dialog {
@@ -1055,8 +1261,10 @@ function selectDay(day: CalendarDay) {
   min-height: 0;
   flex-direction: column;
   overflow: hidden;
-  background: rgba(var(--v-theme-surface), 0.96);
-  border-radius: 0;
+  border: 1px solid #c7dfe9;
+  border-radius: 14px !important;
+  background: rgb(255 255 255 / 96%);
+  box-shadow: 0 9px 22px rgb(7 95 153 / 10%);
 }
 
 .detail-dialog-header {
@@ -1067,20 +1275,43 @@ function selectDay(day: CalendarDay) {
   border-bottom: 1px solid rgba(var(--v-theme-primary), 0.12);
 }
 
+.empty-day > span:last-child {
+  color: #718797;
+}
+
+.detail-dialog-header :deep(.v-card-title) {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #123c56;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.detail-dialog-header :deep(.v-card-subtitle) {
+  margin-top: 3px;
+  color: #6b8292;
+  font-size: 0.68rem;
+  font-weight: 400;
+}
+
 .detail-date-icon {
   display: grid;
-  width: 42px;
-  height: 44px;
+  width: 39px;
+  height: 41px;
   color: rgb(var(--v-theme-on-primary));
   text-align: center;
   background: linear-gradient(145deg, var(--petroil-blue), #087eb2);
-  border-radius: 10px;
+  border-radius: 12px;
   box-shadow: 0 7px 18px rgba(var(--v-theme-primary), 0.24);
   place-content: center;
 }
 
 .detail-date-icon span {
-  font-size: 1.15rem;
+  font-size: 1rem;
   font-weight: 900;
   line-height: 1;
 }
@@ -1099,14 +1330,70 @@ function selectDay(day: CalendarDay) {
   overflow-y: auto;
 }
 
+.detail-dialog-footer {
+  display: flex;
+  min-height: 48px;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 9px 11px !important;
+  background: #f7fbfc;
+}
+
+.detail-dialog-footer__icon {
+  display: grid;
+  width: 25px;
+  height: 25px;
+  flex: 0 0 auto;
+  border-radius: 8px;
+  place-items: center;
+  background: #e2f2f8;
+  color: #0872a5;
+}
+
 .dialog-rule {
+  display: block;
+  padding-top: 2px;
   color: rgba(var(--v-theme-on-surface), 0.62);
-  font-size: 0.66rem;
+  font-size: 0.6rem;
+  line-height: 1.4;
 }
 
 .day-panel {
-  height: calc(clamp(410px, calc(100vh - 365px), 650px) + 32px);
+  height: calc(clamp(390px, calc(100vh - 350px), 625px) + 32px);
   min-width: 0;
+  padding: 6px 6px 6px 5px;
+  background: #d5eaf3;
+}
+
+@media (max-width: 1180px) {
+  .month-count {
+    display: none;
+  }
+
+  .calendar-layout {
+    grid-template-columns: minmax(0, 1fr) 238px;
+  }
+
+  .calendar-filters {
+    grid-template-columns: repeat(2, minmax(110px, 138px)) auto;
+  }
+}
+
+@media (max-height: 820px) and (min-width: 761px) {
+  .calendar-heading {
+    min-height: 38px;
+    margin-bottom: 7px;
+  }
+
+  .calendar-grid {
+    height: calc(100vh - 332px);
+    min-height: 365px;
+  }
+
+  .day-panel {
+    height: calc(100vh - 300px);
+    min-height: 397px;
+  }
 }
 
 @media (max-width: 760px) {

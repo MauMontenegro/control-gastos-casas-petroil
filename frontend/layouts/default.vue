@@ -413,7 +413,7 @@ function handleLogout() {
   align-items: center;
   gap: 8px;
   padding: 0 24px;
-  margin: 2px 3px 4px;
+  margin: 2px 3px 0;
   border: 1px solid transparent;
   border-radius: 11px;
   color: rgb(255 255 255 / 78%);
@@ -445,9 +445,11 @@ function handleLogout() {
 }
 
 .top-tab--active {
+  border-radius: 11px 11px 0 0;
   border-color: rgb(255 255 255 / 15%);
+  border-bottom: 4px solid #ff791f;
   background: linear-gradient(180deg, #28668d, #1b587f);
-  box-shadow: inset 0 -4px #ff791f, 0 4px 10px rgb(0 37 62 / 22%);
+  box-shadow: 0 4px 10px rgb(0 37 62 / 22%);
   color: #fff;
 }
 
