@@ -94,19 +94,18 @@ async function uploadSelectedToSipp() {
 </script>
 
 <template>
-  <div>
-    <div class="d-flex justify-space-between align-end flex-wrap ga-4 mb-6">
+  <section class="requests-page">
+    <header class="requests-heading">
       <div>
-        <p class="text-caption font-weight-bold text-secondary text-uppercase mb-1">INCREMENTOS</p>
-        <h1 class="text-h4 font-weight-bold mb-1">Solicitud de incrementos</h1>
-        <p class="text-body-2 text-medium-emphasis">
+        <h1>Solicitud de incrementos</h1>
+        <span>
           Seguimiento de solicitudes, autorizaciones y origen de recursos.
-        </p>
+        </span>
       </div>
-      <div class="d-flex ga-2">
+      <div class="requests-actions">
         <v-btn
+          class="sipp-button"
           variant="outlined"
-          color="secondary"
           prepend-icon="mdi-cloud-upload-outline"
           :disabled="!selected.length"
           :loading="uploadingSipp"
@@ -114,11 +113,11 @@ async function uploadSelectedToSipp() {
         >
           Subir a SIPP{{ selected.length ? ` (${selected.length})` : '' }}
         </v-btn>
-        <v-btn color="primary" prepend-icon="mdi-plus" @click="showNewRequestModal = true">{{
+        <v-btn class="new-request-button" prepend-icon="mdi-plus" @click="showNewRequestModal = true">{{
           t('common.newRequest')
         }}</v-btn>
       </div>
-    </div>
+    </header>
 
     <v-alert
       v-if="sippError"
@@ -143,42 +142,30 @@ async function uploadSelectedToSipp() {
       {{ sippSuccessMessage }}
     </v-alert>
 
-    <v-row class="mb-2">
-      <v-col cols="6" sm="3">
-        <v-card class="pa-4">
-          <span class="text-caption text-medium-emphasis d-block">Pendientes</span>
-          <strong class="text-h6 d-block">{{ store.pending.length }}</strong>
-          <small class="text-caption text-medium-emphasis">{{
-            formatCurrency(pendingAmount)
-          }}</small>
-        </v-card>
-      </v-col>
-      <v-col cols="6" sm="3">
-        <v-card class="pa-4">
-          <span class="text-caption text-medium-emphasis d-block">En aprobación</span>
-          <strong class="text-h6 d-block">{{ store.pending.length }}</strong>
-          <small class="text-caption text-medium-emphasis">Requieren decisión</small>
-        </v-card>
-      </v-col>
-      <v-col cols="6" sm="3">
-        <v-card class="pa-4">
-          <span class="text-caption text-medium-emphasis d-block">Autorizadas</span>
-          <strong class="text-h6 d-block">{{ store.approved.length }}</strong>
-          <small class="text-caption text-medium-emphasis">{{
-            formatCurrency(approvedAmount)
-          }}</small>
-        </v-card>
-      </v-col>
-      <v-col cols="6" sm="3">
-        <v-card class="pa-4">
-          <span class="text-caption text-medium-emphasis d-block">Corrección / rechazo</span>
-          <strong class="text-h6 d-block">{{ store.rejected.length }}</strong>
-          <small class="text-caption text-medium-emphasis">Requieren ajustes</small>
-        </v-card>
-      </v-col>
-    </v-row>
+    <div class="request-metrics">
+      <article class="request-metric request-metric--blue">
+        <span>Pendientes</span>
+        <strong>{{ store.pending.length }}</strong>
+        <small>{{ formatCurrency(pendingAmount) }}</small>
+      </article>
+      <article class="request-metric request-metric--orange">
+        <span>En aprobación</span>
+        <strong>{{ store.pending.length }}</strong>
+        <small>Requieren decisión</small>
+      </article>
+      <article class="request-metric request-metric--green">
+        <span>Autorizadas</span>
+        <strong>{{ store.approved.length }}</strong>
+        <small>{{ formatCurrency(approvedAmount) }}</small>
+      </article>
+      <article class="request-metric request-metric--yellow">
+        <span>Corrección / rechazo</span>
+        <strong>{{ store.rejected.length }}</strong>
+        <small>Requieren ajustes</small>
+      </article>
+    </div>
 
-    <v-card>
+    <v-card class="requests-table-card" elevation="0">
       <v-data-table
         v-model="selected"
         :headers="headers"
@@ -202,12 +189,24 @@ async function uploadSelectedToSipp() {
           <strong>{{ formatCurrency(item.total) }}</strong>
         </template>
         <template #item.status="{ item }">
-          <v-chip size="small" :color="statusColor[item.status]" variant="tonal">
+          <v-chip
+            size="small"
+            :color="statusColor[item.status]"
+            variant="tonal"
+            class="request-status-chip"
+            :class="`request-status-chip--${item.status}`"
+          >
             {{ t(`status.${item.status}`) }}
           </v-chip>
         </template>
         <template #item.sippStatus="{ item }">
-          <v-chip size="small" :color="sippStatusColor[item.sippStatus ?? 'no-enviada']" variant="tonal">
+          <v-chip
+            size="small"
+            :color="sippStatusColor[item.sippStatus ?? 'no-enviada']"
+            variant="tonal"
+            class="request-status-chip"
+            :class="`request-status-chip--sipp-${item.sippStatus ?? 'no-enviada'}`"
+          >
             {{ sippStatusLabel[item.sippStatus ?? 'no-enviada'] }}
           </v-chip>
         </template>
@@ -216,11 +215,246 @@ async function uploadSelectedToSipp() {
 
     <RequestFormDialog v-model="showNewRequestModal" />
     <RequestDetailDialog v-model="showDetailModal" :request="detailRequest" />
-  </div>
+  </section>
 </template>
 
 <style scoped>
+.requests-page {
+  min-height: calc(100vh - 126px);
+  margin: -24px;
+  padding: 16px 24px 24px;
+  background: #eaf5fa;
+  color: #0c2f4d;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.requests-heading {
+  position: relative;
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 16px;
+  padding-left: 18px;
+}
+
+.requests-heading::before {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 0;
+  width: 5px;
+  border-radius: 99px;
+  background: linear-gradient(180deg, #ff963e, #ff6f1a);
+  box-shadow: 0 3px 9px rgb(255 111 26 / 22%);
+  content: '';
+}
+
+.requests-heading h1 {
+  margin: 0;
+  color: #123c56;
+  font-size: clamp(1.28rem, 1.8vw, 1.6rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.requests-heading span {
+  display: block;
+  margin-top: 4px;
+  color: #607b8d;
+  font-size: 0.8rem;
+}
+
+.requests-actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.sipp-button,
+.new-request-button {
+  min-height: 39px;
+  border-radius: 8px !important;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.sipp-button {
+  border-color: #8ebcd2 !important;
+  color: #075f99 !important;
+}
+
+.new-request-button {
+  background: linear-gradient(135deg, #ff8a2b, #f36b1b) !important;
+  box-shadow: 0 5px 12px rgb(243 107 27 / 22%);
+  color: #fff !important;
+}
+
+.request-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.request-metric {
+  position: relative;
+  display: flex;
+  min-height: 96px;
+  overflow: hidden;
+  padding: 14px 16px;
+  flex-direction: column;
+  justify-content: center;
+  border: 1px solid #d5e5ed;
+  border-top: 4px solid var(--metric-color);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 94%);
+  box-shadow: 0 6px 16px rgb(20 67 98 / 7%);
+}
+
+.request-metric::after {
+  position: absolute;
+  top: -44px;
+  right: -35px;
+  width: 115px;
+  height: 115px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--metric-color) 8%, transparent);
+  content: '';
+}
+
+.request-metric--blue { --metric-color: #1685b3; }
+.request-metric--orange { --metric-color: #ff791f; }
+.request-metric--green { --metric-color: #2a9a76; }
+.request-metric--yellow { --metric-color: #e9b224; }
+.request-metric span { color: #61798a; font-size: 0.72rem; }
+.request-metric strong { margin: 3px 0 1px; color: #123c56; font-size: 1.25rem; line-height: 1.1; }
+.request-metric small { color: #728696; font-size: 0.65rem; }
+
+.requests-table-card {
+  overflow: hidden;
+  border: 1px solid #b9d9e9;
+  border-top: 4px solid #e9b224;
+  border-radius: 13px !important;
+  background: #eaf6fb;
+  box-shadow: 0 8px 22px rgb(20 67 98 / 8%);
+}
+
+.requests-table-card :deep(.v-data-table) {
+  background: #eaf6fb;
+  color: #172b3a;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.requests-table-card :deep(thead th) {
+  height: 48px !important;
+  border-bottom: 1px solid #086995 !important;
+  background: linear-gradient(135deg, #1389ba, #0872a5) !important;
+  color: #fff !important;
+  font-size: 0.78rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.requests-table-card :deep(thead .v-icon) {
+  color: rgb(255 255 255 / 82%) !important;
+}
+
+.requests-table-card :deep(tbody tr) {
+  background: #eaf6fb;
+  transition: background-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.requests-table-card :deep(tbody td) {
+  height: 58px !important;
+  padding-inline: 14px !important;
+  border-color: #c9e2ed !important;
+  color: #172b3a;
+  font-size: 0.76rem;
+  font-weight: 400;
+}
+
+.requests-table-card :deep(.v-data-table-footer) {
+  border-top: 1px solid #b8d9e7;
+  background: #dff0f7;
+  color: #29485e;
+}
+
 .clickable-rows :deep(tbody tr) {
   cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.clickable-rows :deep(tbody tr:hover) {
+  background: #d7eff9 !important;
+  box-shadow: inset 5px 0 0 #f36a21;
+}
+
+.clickable-rows :deep(tbody tr:has(.v-selection-control--dirty)) {
+  background: #d7eff9;
+  box-shadow: inset 5px 0 0 #0872a5;
+}
+
+.request-status-chip {
+  min-width: 86px;
+  height: 27px !important;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 9px !important;
+  font-size: 0.7rem !important;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.request-status-chip::before {
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: currentcolor;
+  content: '';
+  opacity: 0.65;
+}
+
+.request-status-chip--en-revision,
+.request-status-chip--sipp-en-proceso {
+  border-color: #d8e5ef;
+  background: #edf4f9 !important;
+  color: #376b8e !important;
+}
+
+.request-status-chip--autorizada,
+.request-status-chip--sipp-enviada {
+  border-color: #d4e9df;
+  background: #eaf5ef !important;
+  color: #247556 !important;
+}
+
+.request-status-chip--correccion,
+.request-status-chip--sipp-error {
+  border-color: #f1d9cf;
+  background: #fff0eb !important;
+  color: #b75a37 !important;
+}
+
+.request-status-chip--sipp-no-enviada {
+  border-color: #eadfbd;
+  background: #fbf5e7 !important;
+  color: #806528 !important;
+}
+
+@media (max-width: 900px) {
+  .request-metrics { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 640px) {
+  .requests-heading { align-items: flex-start; flex-direction: column; }
+  .requests-actions { width: 100%; }
+  .requests-actions :deep(.v-btn) { flex: 1; }
+  .request-metrics { grid-template-columns: 1fr; }
 }
 </style>
