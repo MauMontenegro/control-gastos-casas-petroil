@@ -19,11 +19,14 @@ export function useHttpClient() {
       headers.Authorization = `Bearer ${await getAccessTokenSilently()}`
     }
 
-    return $fetch<T>(path, {
+    // $fetch(path) sin cast: al existir rutas tipadas en server/api/, TS
+    // infiere el retorno contra esas rutas conocidas en vez de contra `T`
+    // cuando `path` es un string genérico (bug conocido de ofetch/Nitro).
+    return $fetch(path, {
       baseURL: config.public.apiBaseUrl as string,
       ...options,
       headers,
-    })
+    }) as Promise<T>
   }
 
   return { request }

@@ -48,6 +48,8 @@ export default defineNuxtPlugin((nuxtApp) => {
       VTextField: { variant: 'outlined', density: 'comfortable', rounded: 'lg' },
       VSelect: { variant: 'outlined', density: 'comfortable', rounded: 'lg' },
       VAutocomplete: { variant: 'outlined', density: 'comfortable', rounded: 'lg' },
+      VCombobox: { variant: 'outlined', density: 'comfortable', rounded: 'lg' },
+      VFileInput: { variant: 'outlined', density: 'comfortable', rounded: 'lg' },
       VTextarea: { variant: 'outlined', density: 'comfortable', rounded: 'lg' },
       VDataTable: { density: 'comfortable' },
       VChip: { rounded: 'pill' },

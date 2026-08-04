@@ -1,5 +1,5 @@
 import { useRequestsRepository } from '~/repositories/requestsRepository'
-import type { CreateFundRequestPayload, FundRequest } from '~/types'
+import type { CreateFundRequestPayload, FundRequest, SippUploadResult } from '~/types'
 
 export const useRequestsStore = defineStore('requests', () => {
   const items = ref<FundRequest[]>([])
@@ -28,5 +28,27 @@ export const useRequestsStore = defineStore('requests', () => {
     return created
   }
 
-  return { items, loading, error, pending, approved, rejected, fetchRequests, createRequest }
+  async function uploadToSipp(ids: string[]): Promise<SippUploadResult[]> {
+    const results = await useRequestsRepository().uploadToSipp(ids)
+    for (const result of results) {
+      const item = items.value.find((r) => r.id === result.id)
+      if (item) {
+        item.sippStatus = result.status
+        if (result.sippFolio) item.sippFolio = result.sippFolio
+      }
+    }
+    return results
+  }
+
+  return {
+    items,
+    loading,
+    error,
+    pending,
+    approved,
+    rejected,
+    fetchRequests,
+    createRequest,
+    uploadToSipp,
+  }
 })

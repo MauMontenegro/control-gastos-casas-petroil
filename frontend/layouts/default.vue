@@ -16,7 +16,7 @@ const navItems = [
   { key: 'pagos', to: '/pagos', icon: 'mdi-clipboard-text-outline' },
   { key: 'calendario', to: '/calendario', icon: 'mdi-calendar-month-outline' },
   { key: 'reportes', to: '/', icon: 'mdi-chart-bar' },
-  { key: 'sucursales', to: '/sucursales', icon: 'mdi-office-building-outline' },
+  { key: 'sucursales', to: '/sucursales', icon: 'mdi-home-city-outline' },
   { key: 'configuracionRpa', to: '/configuracion-rpa', icon: 'mdi-robot-outline' },
 ]
 
