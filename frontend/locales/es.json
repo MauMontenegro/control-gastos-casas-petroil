@@ -7,7 +7,7 @@
     "limpieza": "Limpieza",
     "comprobaciones": "Comprobaciones",
     "reportes": "Dashboards",
-    "sucursales": "Sucursales"
+    "sucursales": "Casas Petroil"
   },
   "common": {
     "loading": "Cargando...",
@@ -34,27 +34,26 @@
       "title": "Nueva solicitud de fondos",
       "subtitle": "Captura la información principal. El folio se asignará automáticamente.",
       "fields": {
-        "concept": "Concepto",
-        "conceptPlaceholder": "Selecciona un concepto...",
         "concepts": "Conceptos",
         "amount": "Importe",
-        "branch": "Sucursal",
+        "casa": "Casa Petroil",
         "card": "Tarjeta bancaria",
         "cardPlaceholder": "Selecciona una tarjeta...",
         "expenseType": "Tipo de gasto",
-        "provider": "Proveedor o beneficiario",
+        "incrementType": "Tipo de Incremento",
+        "provider": "Proveedor",
         "providerPlaceholder": "Selecciona un proveedor...",
-        "document": "Documento soporte",
-        "comment": "Comentario",
-        "commentPlaceholder": "Escribe un comentario..."
+        "document": "Documento",
+        "comment": "Motivo de Incremento",
+        "commentPlaceholder": "Escribe el motivo del incremento..."
       },
       "errors": {
-        "concept": "Selecciona un concepto",
         "amount": "Ingresa un importe válido",
         "document": "Adjunta el documento soporte",
-        "branch": "Selecciona una sucursal",
+        "casa": "Selecciona una casa Petroil",
         "card": "Selecciona una tarjeta bancaria",
         "expenseType": "Selecciona un tipo de gasto",
+        "incrementType": "Selecciona un tipo de incremento",
         "provider": "Selecciona un proveedor"
       },
       "conceptLabel": "Concepto {n}",

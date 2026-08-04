@@ -1,19 +1,15 @@
 <script setup lang="ts">
 import type { CreateFundRequestPayload } from '~/types'
 
-interface RequestFormValues {
-  branch: string
-  card: string
-  expenseType: string
-  provider: string
-  comment?: string
-}
-
 interface ConceptRow {
   key: string
-  concept: string
+  expenseType: string
+  incrementType: string
+  casa: number | null
+  provider: string
   amount: number | null
   document: File | null
+  comment: string
 }
 
 function todayDate(): string {
@@ -23,26 +19,24 @@ function todayDate(): string {
 function createConceptRow(): ConceptRow {
   return {
     key: crypto.randomUUID(),
-    concept: '',
+    expenseType: expenseTypeOptions[0],
+    incrementType: '',
+    casa: null,
+    provider: '',
     amount: null,
     document: null,
+    comment: '',
   }
 }
 
 const open = defineModel<boolean>({ default: false })
 
 const store = useRequestsStore()
-const branchesStore = useBranchesStore()
+const casasStore = useCasasStore()
 const { t } = useI18n()
 
-const conceptOptions = [
-  'Servicios recurrentes',
-  'Limpieza semanal',
-  'Mantenimiento',
-  'Nómina',
-  'Otro',
-]
-const expenseTypeOptions = ['Servicio recurrente', 'Gasto único', 'Mantenimiento', 'Nómina', 'Otro']
+const expenseTypeOptions = ['Luz', 'Agua', 'Limpieza', 'Gas', 'Internet', 'Otros']
+const incrementTypeOptions = ['Ventanilla Bancaria', 'Cajero Automático', 'Pago en establecimiento']
 const providerOptions = [
   'CFE',
   'Telmex',
@@ -52,33 +46,24 @@ const providerOptions = [
 ]
 // TODO: sin catálogo de tarjetas bancarias todavía (no existe endpoint en el
 // backend). Reemplazar por un fetch real cuando exista.
-const cardOptions = ['Tarjeta CFE ****1234', 'Tarjeta Telmex ****5678', 'Tarjeta General ****9012']
+const cardOptions = [
+  'Tarjeta CFE ****1234',
+  'Tarjeta Telmex ****5678',
+  'Tarjeta General ****9012',
+  'Abastecedora - BBVA BANCOMER - 01',
+]
 
-const branchOptions = computed(() =>
-  branchesStore.items.map((b) => ({ title: b.name.replace('Sucursal ', ''), value: b.id })),
+const casaOptions = computed(() =>
+  casasStore.items.map((c) => ({ title: `${c.empresa} · ${c.nombre}`, value: c.id })),
 )
 
-const { handleSubmit, defineField, errors, resetForm, setFieldValue, values } =
-  useForm<RequestFormValues>({
-    initialValues: {
-      expenseType: expenseTypeOptions[0],
-    },
-    validationSchema: {
-      branch: (value: string) => !!value || t('requests.modal.errors.branch'),
-      card: (value: string) => !!value || t('requests.modal.errors.card'),
-      expenseType: (value: string) => !!value || t('requests.modal.errors.expenseType'),
-      provider: (value: string) => !!value || t('requests.modal.errors.provider'),
-    },
-  })
-
-const [branch, branchAttrs] = defineField('branch')
-const [card, cardAttrs] = defineField('card')
-const [expenseType, expenseTypeAttrs] = defineField('expenseType')
-const [provider, providerAttrs] = defineField('provider')
-const [comment, commentAttrs] = defineField('comment')
-
+const card = ref('')
 const concepts = ref<ConceptRow[]>([createConceptRow()])
-const conceptsSubmitAttempted = ref(false)
+const submitAttempted = ref(false)
+
+const cardError = computed(() =>
+  submitAttempted.value && !card.value ? t('requests.modal.errors.card') : null,
+)
 
 function addConcept() {
   concepts.value.push(createConceptRow())
@@ -91,8 +76,11 @@ function removeConcept(key: string) {
 }
 
 function conceptRowError(row: ConceptRow): string | null {
-  if (!conceptsSubmitAttempted.value) return null
-  if (!row.concept) return t('requests.modal.errors.concept')
+  if (!submitAttempted.value) return null
+  if (!row.expenseType) return t('requests.modal.errors.expenseType')
+  if (!row.incrementType) return t('requests.modal.errors.incrementType')
+  if (row.casa == null) return t('requests.modal.errors.casa')
+  if (!row.provider) return t('requests.modal.errors.provider')
   if (!row.amount || Number(row.amount) <= 0) return t('requests.modal.errors.amount')
   if (!row.document) return t('requests.modal.errors.document')
   return null
@@ -103,56 +91,54 @@ const totalAmount = computed(() =>
 )
 
 const conceptsValid = computed(() =>
-  concepts.value.every((row) => row.concept && Number(row.amount) > 0 && row.document),
+  concepts.value.every(
+    (row) =>
+      row.expenseType &&
+      row.incrementType &&
+      row.casa != null &&
+      row.provider &&
+      Number(row.amount) > 0 &&
+      row.document,
+  ),
 )
 
 const submitting = ref(false)
 const submitError = ref<string | null>(null)
 
 watch(open, (isOpen) => {
-  if (isOpen && branchesStore.items.length === 0) {
-    branchesStore.fetchBranches()
+  if (isOpen && casasStore.items.length === 0) {
+    casasStore.fetchCasas()
   }
 })
 
-watch(
-  () => branchesStore.items,
-  (items) => {
-    if (items.length && !values.branch) {
-      setFieldValue('branch', items[0].id)
-    }
-  },
-  { immediate: true },
-)
-
-function resetConcepts() {
+function resetFormState() {
+  card.value = ''
   concepts.value = [createConceptRow()]
-  conceptsSubmitAttempted.value = false
+  submitAttempted.value = false
 }
 
-const onSubmit = handleSubmit(async (submittedValues) => {
-  conceptsSubmitAttempted.value = true
-  if (!conceptsValid.value) return
+async function onSubmit() {
+  submitAttempted.value = true
+  if (!card.value || !conceptsValid.value) return
 
   submitting.value = true
   submitError.value = null
   try {
     const payload: CreateFundRequestPayload = {
       requiredDate: todayDate(),
-      branch: submittedValues.branch,
-      card: submittedValues.card,
-      expenseType: submittedValues.expenseType,
-      provider: submittedValues.provider,
-      comment: submittedValues.comment || undefined,
+      card: card.value,
       concepts: concepts.value.map((row) => ({
-        concept: row.concept,
+        expenseType: row.expenseType,
+        incrementType: row.incrementType,
+        casa: row.casa as number,
+        provider: row.provider,
         amount: Number(row.amount),
         document: row.document as File,
+        comment: row.comment || undefined,
       })),
     }
     await store.createRequest(payload)
-    resetForm()
-    resetConcepts()
+    resetFormState()
     open.value = false
   } catch (e) {
     console.error('Error al crear la solicitud de fondos:', e)
@@ -162,20 +148,19 @@ const onSubmit = handleSubmit(async (submittedValues) => {
   } finally {
     submitting.value = false
   }
-})
+}
 
 function handleCancel() {
-  resetForm()
-  resetConcepts()
+  resetFormState()
   submitError.value = null
   open.value = false
 }
 </script>
 
 <template>
-  <v-dialog v-model="open" max-width="720" scrollable>
+  <v-dialog v-model="open" max-width="820" scrollable>
     <v-card>
-      <v-card-item class="pa-6 pb-4">
+      <v-card-item class="pa-5 pb-3">
         <div class="d-flex justify-space-between align-start">
           <div>
             <p class="text-caption font-weight-bold text-primary text-uppercase mb-1">
@@ -191,8 +176,8 @@ function handleCancel() {
 
       <v-divider />
 
-      <v-card-text class="pa-6">
-        <p class="text-body-2 text-medium-emphasis mb-6">{{ t('requests.modal.subtitle') }}</p>
+      <v-card-text class="pa-5">
+        <p class="text-body-2 text-medium-emphasis mb-3">{{ t('requests.modal.subtitle') }}</p>
 
         <v-alert
           v-if="submitError"
@@ -200,69 +185,24 @@ function handleCancel() {
           variant="tonal"
           density="comfortable"
           closable
-          class="mb-4"
+          class="mb-3"
           @click:close="submitError = null"
         >
           {{ submitError }}
         </v-alert>
 
         <form @submit.prevent="onSubmit">
-          <div class="d-flex flex-column ga-4">
-            <v-row dense>
-              <v-col cols="12" sm="6">
-                <p class="text-caption font-weight-bold text-uppercase mb-1">
-                  {{ t('requests.modal.fields.branch') }}
-                </p>
-                <v-select
-                  v-model="branch"
-                  v-bind="branchAttrs"
-                  :items="branchOptions"
-                  hide-details="auto"
-                  :error-messages="errors.branch ? [errors.branch] : []"
-                />
-              </v-col>
-              <v-col cols="12" sm="6">
-                <p class="text-caption font-weight-bold text-uppercase mb-1">
-                  {{ t('requests.modal.fields.card') }}
-                </p>
-                <v-select
-                  v-model="card"
-                  v-bind="cardAttrs"
-                  :items="cardOptions"
-                  :placeholder="t('requests.modal.fields.cardPlaceholder')"
-                  hide-details="auto"
-                  :error-messages="errors.card ? [errors.card] : []"
-                />
-              </v-col>
-            </v-row>
-
-            <v-row dense>
-              <v-col cols="12" sm="6">
-                <p class="text-caption font-weight-bold text-uppercase mb-1">
-                  {{ t('requests.modal.fields.expenseType') }}
-                </p>
-                <v-select
-                  v-model="expenseType"
-                  v-bind="expenseTypeAttrs"
-                  :items="expenseTypeOptions"
-                  hide-details="auto"
-                  :error-messages="errors.expenseType ? [errors.expenseType] : []"
-                />
-              </v-col>
-              <v-col cols="12" sm="6">
-                <p class="text-caption font-weight-bold text-uppercase mb-1">
-                  {{ t('requests.modal.fields.provider') }}
-                </p>
-                <v-combobox
-                  v-model="provider"
-                  v-bind="providerAttrs"
-                  :items="providerOptions"
-                  :placeholder="t('requests.modal.fields.providerPlaceholder')"
-                  hide-details="auto"
-                  :error-messages="errors.provider ? [errors.provider] : []"
-                />
-              </v-col>
-            </v-row>
+          <div class="d-flex flex-column ga-3">
+            <v-col cols="12" sm="5" class="pa-0">
+              <v-select
+                v-model="card"
+                :items="cardOptions"
+                :label="t('requests.modal.fields.card')"
+                :placeholder="t('requests.modal.fields.cardPlaceholder')"
+                hide-details="auto"
+                :error-messages="cardError ? [cardError] : []"
+              />
+            </v-col>
 
             <div>
               <div class="d-flex justify-space-between align-center mb-2">
@@ -284,7 +224,7 @@ function handleCancel() {
                 v-for="(row, index) in concepts"
                 :key="row.key"
                 variant="outlined"
-                class="pa-4 mb-3"
+                class="pa-3 mb-3"
               >
                 <div class="d-flex justify-space-between align-center mb-2">
                   <span class="text-caption font-weight-bold text-medium-emphasis">
@@ -294,41 +234,82 @@ function handleCancel() {
                     v-if="concepts.length > 1"
                     icon="mdi-close"
                     variant="text"
-                    size="x-small"
+                    size="small"
                     density="comfortable"
                     @click="removeConcept(row.key)"
                   />
                 </div>
 
-                <div class="d-flex flex-column ga-3">
-                  <v-combobox
-                    v-model="row.concept"
-                    :items="conceptOptions"
-                    :label="t('requests.modal.fields.concept')"
-                    :placeholder="t('requests.modal.fields.conceptPlaceholder')"
-                    hide-details="auto"
-                  />
-                  <v-text-field
-                    v-model="row.amount"
-                    type="number"
-                    prefix="$"
-                    :label="t('requests.modal.fields.amount')"
-                    placeholder="0.00"
-                    hide-details="auto"
-                  />
-                  <v-file-input
-                    v-model="row.document"
-                    :label="t('requests.modal.fields.document')"
-                    accept="application/pdf,image/*"
-                    prepend-icon=""
-                    prepend-inner-icon="mdi-paperclip"
-                    show-size
-                    hide-details="auto"
-                  />
-                  <p v-if="conceptRowError(row)" class="text-caption text-error mb-0">
-                    {{ conceptRowError(row) }}
-                  </p>
-                </div>
+                <v-row dense>
+                  <v-col cols="6" sm="3">
+                    <v-select
+                      v-model="row.expenseType"
+                      :items="expenseTypeOptions"
+                      :label="t('requests.modal.fields.expenseType')"
+                      hide-details="auto"
+                    />
+                  </v-col>
+                  <v-col cols="6" sm="3">
+                    <v-select
+                      v-model="row.incrementType"
+                      :items="incrementTypeOptions"
+                      :label="t('requests.modal.fields.incrementType')"
+                      hide-details="auto"
+                    />
+                  </v-col>
+                  <v-col cols="6" sm="3">
+                    <v-select
+                      v-model="row.casa"
+                      :items="casaOptions"
+                      :label="t('requests.modal.fields.casa')"
+                      hide-details="auto"
+                    />
+                  </v-col>
+                  <v-col cols="6" sm="3">
+                    <v-combobox
+                      v-model="row.provider"
+                      :items="providerOptions"
+                      :label="t('requests.modal.fields.provider')"
+                      :placeholder="t('requests.modal.fields.providerPlaceholder')"
+                      hide-details="auto"
+                    />
+                  </v-col>
+                </v-row>
+
+                <v-row dense class="mt-0">
+                  <v-col cols="6" sm="3">
+                    <v-text-field
+                      v-model="row.amount"
+                      type="number"
+                      prefix="$"
+                      :label="t('requests.modal.fields.amount')"
+                      placeholder="0.00"
+                      hide-details="auto"
+                    />
+                  </v-col>
+                  <v-col cols="6" sm="3">
+                    <v-file-input
+                      v-model="row.document"
+                      :label="t('requests.modal.fields.document')"
+                      accept="application/pdf,image/*"
+                      prepend-icon=""
+                      prepend-inner-icon="mdi-paperclip"
+                      hide-details="auto"
+                    />
+                  </v-col>
+                  <v-col cols="12" sm="6">
+                    <v-text-field
+                      v-model="row.comment"
+                      :label="t('requests.modal.fields.comment')"
+                      :placeholder="t('requests.modal.fields.commentPlaceholder')"
+                      hide-details="auto"
+                    />
+                  </v-col>
+                </v-row>
+
+                <p v-if="conceptRowError(row)" class="text-caption text-error mb-0 mt-1">
+                  {{ conceptRowError(row) }}
+                </p>
               </v-card>
 
               <div class="d-flex justify-end">
@@ -336,19 +317,6 @@ function handleCancel() {
                   {{ t('requests.modal.total') }}: {{ formatCurrency(totalAmount) }}
                 </span>
               </div>
-            </div>
-
-            <div>
-              <p class="text-caption font-weight-bold text-uppercase mb-1">
-                {{ t('requests.modal.fields.comment') }}
-              </p>
-              <v-textarea
-                v-model="comment"
-                v-bind="commentAttrs"
-                rows="3"
-                :placeholder="t('requests.modal.fields.commentPlaceholder')"
-                hide-details="auto"
-              />
             </div>
           </div>
         </form>

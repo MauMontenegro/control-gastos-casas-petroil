@@ -1,4 +1,4 @@
-import type { CreateFundRequestPayload, FundRequest } from '~/types'
+import type { CreateFundRequestPayload, FundRequest, SippUploadResult } from '~/types'
 import { useHttpClient } from '~/repositories/httpClient'
 
 export function useRequestsRepository() {
@@ -6,25 +6,34 @@ export function useRequestsRepository() {
     return useHttpClient().request<FundRequest[]>('/fund-requests')
   }
 
+  async function uploadToSipp(ids: string[]): Promise<SippUploadResult[]> {
+    return useHttpClient().request<SippUploadResult[]>('/fund-requests/sipp-upload', {
+      method: 'POST',
+      body: { ids },
+    })
+  }
+
   async function createRequest(payload: CreateFundRequestPayload): Promise<FundRequest> {
     const body = new FormData()
     body.append('requiredDate', payload.requiredDate)
-    body.append('branch', payload.branch)
     body.append('card', payload.card)
-    body.append('expenseType', payload.expenseType)
-    body.append('provider', payload.provider)
-    if (payload.comment) body.append('comment', payload.comment)
 
-    // Cada concepto va como metadata en `concepts` (JSON) más un archivo
-    // adjunto en un campo `document_<index>` referenciado por `documentField`,
-    // para que el backend pueda enlazar cada documento con su concepto sin
-    // depender del orden de llegada de los campos del multipart.
+    // La solicitud en sí solo tiene fecha y tarjeta. Todo lo demás (tipo de
+    // gasto, tipo de incremento, casa Petroil, proveedor, importe, motivo)
+    // vive por concepto. Cada concepto lleva su archivo en un campo
+    // `document_<index>` referenciado por `documentField`, para que el
+    // backend enlace cada documento con su concepto sin depender del orden
+    // de llegada de los campos del multipart.
     body.append(
       'concepts',
       JSON.stringify(
         payload.concepts.map((item, index) => ({
-          concept: item.concept,
+          expenseType: item.expenseType,
+          incrementType: item.incrementType,
+          casa: item.casa,
+          provider: item.provider,
           amount: item.amount,
+          comment: item.comment,
           documentField: `document_${index}`,
         })),
       ),
@@ -39,5 +48,5 @@ export function useRequestsRepository() {
     })
   }
 
-  return { getRequests, createRequest }
+  return { getRequests, createRequest, uploadToSipp }
 }
