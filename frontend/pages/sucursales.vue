@@ -149,9 +149,7 @@ function openDetails(casa: Casa) {
       </label>
       <label class="empresa-filter">
         <span>Empresa</span>
-        <select v-model="empresaFilter">
-          <option v-for="item in empresas" :key="item">{{ item }}</option>
-        </select>
+        <v-select v-model="empresaFilter" :items="empresas" density="compact" hide-details />
       </label>
       <span class="results">{{ filteredCasas.length }} casas</span>
     </div>
@@ -296,27 +294,29 @@ function openDetails(casa: Casa) {
 </template>
 
 <style scoped>
-.casas-page { --blue:#075f99; --orange:#ff791f; position:relative; min-height:calc(100vh - 126px); overflow:hidden; margin:-24px; padding:16px 24px 24px; background:#eaf5fa; color:#0c2f4d; font-family:Arial,Helvetica,sans-serif; isolation:isolate; }
-.casas-page::before,.casas-page::after { position:absolute; z-index:-1; border:1px solid rgb(255 255 255 / 9%); border-radius:50%; content:''; pointer-events:none; }
+.casas-page { --blue:#075f99; --orange:#ff791f; position:relative; min-height:calc(100vh - 126px); overflow:hidden; margin:-24px; padding:16px 24px 24px; background-color:#dcecf3; background-image:none; color:#0c2f4d; font-family:Arial,Helvetica,sans-serif; isolation:isolate; }
+.casas-page::before,.casas-page::after { display:none; }
 .casas-page::before { top:-150px; right:-70px; width:460px; height:460px; }
 .casas-page::after { top:-70px; right:35px; width:270px; height:270px; background:rgb(255 255 255 / 4%); }
 .page-heading { position:relative; display:flex; min-height:48px; align-items:center; justify-content:space-between; gap:20px; margin-bottom:16px; padding-left:18px; }
 .page-heading::before { position:absolute; top:2px; bottom:2px; left:0; width:5px; border-radius:99px; background:linear-gradient(180deg,#ff963e,#ff6f1a); box-shadow:0 3px 9px rgb(255 111 26 / 22%); content:''; }
 .page-heading h1 { margin:0; font-size:clamp(1.28rem,1.8vw,1.6rem); font-weight:600; letter-spacing:-.02em; line-height:1.2; }
 .page-heading div > span { display:block; margin-top:5px; color:#6d8192; font-size:.8rem; }
-.toolbar { display:flex; align-items:flex-end; gap:10px; padding:9px 11px; margin-bottom:12px; border-left:4px solid var(--orange); border-radius:11px; background:linear-gradient(110deg,#dcecf5,#eef6fa); }
+.toolbar { display:flex; align-items:flex-end; gap:10px; padding:9px 11px; margin-bottom:12px; border-left:4px solid var(--orange); border-radius:11px; background:#dcecf5; }
 .search-field { display:flex; align-items:center; min-height:37px; padding:0 14px; flex:1; border:1px solid #b9d1df; border-radius:8px; background:#fff; color:#668196; }
 .search-field input { width:100%; border:0; outline:0; color:#173d59; font:inherit; font-size:11px; }
 .empresa-filter { display:flex; align-items:center; gap:7px; min-height:37px; padding:0 10px; border:1px solid #b9d1df; border-radius:8px; background:#fff; }
 .empresa-filter span { color:#738899; font-size:9px; font-weight:800; text-transform:uppercase; }
-.empresa-filter select { min-width:130px; border:0; outline:0; background:transparent; color:#173d59; font-size:11px; font-weight:700; }
+.empresa-filter :deep(.v-input) { min-width:130px; }
+.empresa-filter :deep(.v-field) { border:0; background:transparent; color:#173d59; font-size:11px; font-weight:700; }
+.empresa-filter :deep(.v-field__input) { min-height:35px; padding-top:2px; padding-bottom:2px; }
 .results { padding:0 4px 9px; color:#617a8e; font-size:10px; white-space:nowrap; }
 .casas-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; perspective:1200px; }
-.casa-card { position:relative; display:flex; min-height:270px; overflow:hidden; padding:18px; flex-direction:column; border:0; border-radius:17px; background:linear-gradient(145deg,rgba(255,255,255,.97),rgba(228,242,248,.96)); box-shadow:0 10px 25px rgba(7,95,153,.12),0 0 18px rgba(74,157,195,.08); animation:casa-card-in .48s ease both; transition:transform .2s ease,box-shadow .2s ease,filter .2s ease; }
+.casa-card { position:relative; display:flex; min-height:270px; overflow:hidden; padding:18px; flex-direction:column; border:0; border-radius:17px; background:#f2f8fb; box-shadow:0 9px 20px rgba(7,71,112,.11); animation:casa-card-in .48s ease both; transition:transform .2s ease,box-shadow .2s ease,filter .2s ease; }
 .casa-card:nth-child(2) { animation-delay:70ms; }
 .casa-card:nth-child(3) { animation-delay:140ms; }
 .casa-card:nth-child(4) { animation-delay:210ms; }
-.casa-card:hover { transform:translateY(-5px) scale(1.008); box-shadow:0 17px 34px rgba(7,95,153,.2),0 0 22px rgba(255,121,31,.1); filter:saturate(1.08); }
+.casa-card:hover { transform:translateY(-5px) scale(1.008); box-shadow:0 15px 28px rgba(7,71,112,.18); filter:saturate(1.04); }
 .casa-card__top { display:flex; align-items:center; justify-content:space-between; gap:10px; }
 .casa-initials { display:grid; width:42px; height:42px; border:1px solid #ffd5bc; border-radius:10px; place-items:center; background:#fff0e7; color:#075487; font-size:14px; font-weight:900; letter-spacing:.03em; transition:transform .2s ease,background .2s ease; }
 .casa-card:hover .casa-initials { transform:translateY(-2px) rotate(-2deg); background:#ffe8da; }
@@ -326,7 +326,7 @@ function openDetails(casa: Casa) {
 .casa-card__title h2 { margin:0; font-size:1rem; font-weight:700; }
 .casa-card__title p { margin:8px 0 0; color:#758a9a; font-size:.76rem; }
 .casa-meta { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:15px; }
-.casa-meta > span { display:flex; min-width:0; min-height:60px; padding:9px 10px; flex-direction:column; justify-content:center; border:1px solid rgba(167,203,219,.65); border-radius:10px; background:linear-gradient(145deg,rgba(236,247,251,.92),rgba(225,241,248,.82)); }
+.casa-meta > span { display:flex; min-width:0; min-height:60px; padding:9px 10px; flex-direction:column; justify-content:center; border:1px solid rgba(167,203,219,.75); border-radius:10px; background:#e6f2f7; }
 .casa-meta small { color:#7d909f; font-size:.7rem; }
 .casa-meta strong { overflow:hidden; margin-top:2px; font-size:.8rem; text-overflow:ellipsis; white-space:nowrap; }
 .details-button { position:relative; width:100%; min-height:39px; overflow:hidden; margin-top:auto; border:1px solid #064f80; border-radius:8px; background:linear-gradient(135deg,#086da7,#075487); color:#fff; font-size:.74rem; font-weight:700; letter-spacing:.01em; cursor:pointer; transition:transform .15s ease,box-shadow .15s ease,background .15s ease; }

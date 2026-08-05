@@ -116,15 +116,11 @@ function exportDashboard() {
     <div class="filters-panel">
       <label>
         <span>Sucursal</span>
-        <select v-model="selectedBranch">
-          <option v-for="branch in branches" :key="branch">{{ branch }}</option>
-        </select>
+        <v-select v-model="selectedBranch" :items="branches" density="compact" hide-details />
       </label>
       <label>
         <span>Periodo</span>
-        <select v-model="selectedPeriod">
-          <option v-for="period in periods" :key="period">{{ period }}</option>
-        </select>
+        <v-select v-model="selectedPeriod" :items="periods" density="compact" hide-details />
       </label>
       <button type="button" @click="exportDashboard">
         <v-icon icon="mdi-download-outline" size="20" /> Descargar resumen
@@ -235,11 +231,12 @@ function exportDashboard() {
 .dashboard__heading h1 { margin:0; color:#123c56; font-size:clamp(1.28rem,1.8vw,1.6rem); font-weight:600; letter-spacing:-.02em; line-height:1.2; }
 .dashboard__heading div > span { display:block; margin-top:3px; color:#506f82; font-size:11px; }
 .dashboard__heading > small { display:flex; align-items:center; gap:7px; color:#42677d; font-weight:700; }
-.filters-panel { display:grid; grid-template-columns:minmax(190px,.85fr) minmax(190px,.85fr) minmax(240px,1.4fr); gap:12px; padding:13px 15px; margin-bottom:14px; border-left:5px solid var(--orange); border-radius:13px; background:linear-gradient(110deg,#d8eaf4,#edf6fa); box-shadow:0 5px 16px rgba(22,76,111,.07); }
+.filters-panel { display:grid; grid-template-columns:minmax(190px,.85fr) minmax(190px,.85fr) minmax(240px,1.4fr); gap:12px; padding:13px 15px; margin-bottom:14px; border-left:5px solid var(--orange); border-radius:13px; background:#d8eaf4; box-shadow:0 5px 16px rgba(22,76,111,.07); }
 .filters-panel label > span { display:block; margin:0 0 5px 2px; color:#34556e; font-size:.7rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
-.filters-panel select,.filters-panel button { width:100%; min-height:38px; border:1px solid #b3cfdf; border-radius:9px; background:rgba(255,255,255,.84); color:#183f5d; font:inherit; font-size:.8rem; font-weight:600; }
-.filters-panel select { padding:0 14px; outline:none; }
-.filters-panel select:focus { border-color:#5598c1; box-shadow:0 0 0 3px rgba(34,129,186,.14); }
+.filters-panel button { width:100%; min-height:38px; border:1px solid #b3cfdf; border-radius:9px; background:rgba(255,255,255,.84); color:#183f5d; font:inherit; font-size:.8rem; font-weight:600; }
+.filters-panel :deep(.v-field) { min-height:38px; border:1px solid #b3cfdf; border-radius:9px; background:rgba(255,255,255,.84); color:#183f5d; font-size:.8rem; font-weight:600; }
+.filters-panel :deep(.v-field__input) { min-height:38px; padding-top:3px; padding-bottom:3px; }
+.filters-panel :deep(.v-field--focused) { border-color:#5598c1; box-shadow:0 0 0 3px rgba(34,129,186,.14); }
 .filters-panel button { align-self:end; display:flex; align-items:center; justify-content:center; gap:9px; color:#0766a2; cursor:pointer; transition:.15s ease; }
 .filters-panel button:hover { transform:translateY(-1px); box-shadow:0 7px 18px rgba(26,98,143,.12); }
 .metrics { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-bottom:14px; }
