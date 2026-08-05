@@ -1,19 +1,44 @@
 <script setup lang="ts">
 const dashboard = useDashboardStore()
-const selectedBranch = ref('Todas las sucursales')
-const selectedPeriod = ref('Julio 2026')
-const periods = ['Julio 2026', 'Junio 2026', 'Mayo 2026', 'Abril 2026']
+const casas = useCasasStore()
+const selectedCasaId = ref<number | 'todas'>('todas')
 
-const branches = computed(() => [
-  'Todas las sucursales',
-  ...dashboard.branchBudget.map((item) => item.branch),
+const periodFormatter = new Intl.DateTimeFormat('es-MX', {
+  month: 'long',
+  year: 'numeric',
+})
+const periods = computed(() => {
+  const currentMonth = new Date()
+  currentMonth.setDate(1)
+
+  return Array.from({ length: 6 }, (_, index) => {
+    const month = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - index, 1)
+    const label = periodFormatter.format(month)
+    return label.charAt(0).toLocaleUpperCase('es-MX') + label.slice(1)
+  })
+})
+const selectedPeriod = ref(periods.value[0] ?? '')
+
+const casaOptions = computed(() => [
+  { title: 'Todas las casas', value: 'todas' as const },
+  ...casas.items.map((casa) => ({
+    title: casa.empresa ? `${casa.nombre} · ${casa.empresa}` : casa.nombre,
+    value: casa.id,
+  })),
 ])
+const selectedCasaLabel = computed(
+  () =>
+    casaOptions.value.find((option) => option.value === selectedCasaId.value)?.title ??
+    'Todas las casas',
+)
 const totalSpend = computed(() =>
   dashboard.serviceSpend.reduce((total, item) => total + item.amount, 0),
 )
 const budgetUsedPct = computed(() => 100 - (dashboard.kpis?.availableBudgetPct ?? 0))
 
-onMounted(() => dashboard.fetchOverview())
+onMounted(() => {
+  void Promise.all([dashboard.fetchOverview(), casas.fetchCasas()])
+})
 
 const trendChart = computed(() => ({
   series: [
@@ -86,7 +111,7 @@ const donutChart = computed(() => ({
 
 function exportDashboard() {
   const rows = [
-    ['Resumen de gastos', selectedPeriod.value, selectedBranch.value],
+    ['Resumen de gastos', selectedPeriod.value, selectedCasaLabel.value],
     [],
     ['Servicio', 'Importe', 'Participación'],
     ...dashboard.serviceSpend.map((item) => [item.service, item.amount, `${item.percentage}%`]),
@@ -115,9 +140,11 @@ function exportDashboard() {
 
     <div class="filters-panel">
       <label>
-        <span>Sucursal</span>
-        <select v-model="selectedBranch">
-          <option v-for="branch in branches" :key="branch">{{ branch }}</option>
+        <span>Casa Petroil</span>
+        <select v-model="selectedCasaId" :disabled="casas.loading">
+          <option v-for="option in casaOptions" :key="option.value" :value="option.value">
+            {{ option.title }}
+          </option>
         </select>
       </label>
       <label>
