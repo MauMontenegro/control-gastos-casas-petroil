@@ -3,21 +3,17 @@ const dashboard = useDashboardStore()
 const casas = useCasasStore()
 const selectedCasaId = ref<number | 'todas'>('todas')
 
-const periodFormatter = new Intl.DateTimeFormat('es-MX', {
-  month: 'long',
-  year: 'numeric',
-})
-const periods = computed(() => {
-  const currentMonth = new Date()
-  currentMonth.setDate(1)
+function toDateInputValue(date: Date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
 
-  return Array.from({ length: 6 }, (_, index) => {
-    const month = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - index, 1)
-    const label = periodFormatter.format(month)
-    return label.charAt(0).toLocaleUpperCase('es-MX') + label.slice(1)
-  })
-})
-const selectedPeriod = ref(periods.value[0] ?? '')
+const currentDate = new Date()
+const today = toDateInputValue(currentDate)
+const dateFrom = ref(toDateInputValue(new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)))
+const dateTo = ref(today)
 
 const casaOptions = computed(() => [
   { title: 'Todas las casas', value: 'todas' as const },
@@ -111,7 +107,7 @@ const donutChart = computed(() => ({
 
 function exportDashboard() {
   const rows = [
-    ['Resumen de gastos', selectedPeriod.value, selectedCasaLabel.value],
+    ['Resumen de gastos', `Del ${dateFrom.value} al ${dateTo.value}`, selectedCasaLabel.value],
     [],
     ['Servicio', 'Importe', 'Participación'],
     ...dashboard.serviceSpend.map((item) => [item.service, item.amount, `${item.percentage}%`]),
@@ -147,12 +143,19 @@ function exportDashboard() {
           </option>
         </select>
       </label>
-      <label>
+      <div class="date-range-filter">
         <span>Periodo</span>
-        <select v-model="selectedPeriod">
-          <option v-for="period in periods" :key="period">{{ period }}</option>
-        </select>
-      </label>
+        <div>
+          <label>
+            <small>Desde</small>
+            <input v-model="dateFrom" type="date" :max="dateTo" />
+          </label>
+          <label>
+            <small>Hasta</small>
+            <input v-model="dateTo" type="date" :min="dateFrom" :max="today" />
+          </label>
+        </div>
+      </div>
       <button type="button" @click="exportDashboard">
         <v-icon icon="mdi-download-outline" size="20" /> Descargar resumen
       </button>
@@ -262,11 +265,14 @@ function exportDashboard() {
 .dashboard__heading h1 { margin:0; color:#123c56; font-size:clamp(1.28rem,1.8vw,1.6rem); font-weight:600; letter-spacing:-.02em; line-height:1.2; }
 .dashboard__heading div > span { display:block; margin-top:3px; color:#506f82; font-size:11px; }
 .dashboard__heading > small { display:flex; align-items:center; gap:7px; color:#42677d; font-weight:700; }
-.filters-panel { display:grid; grid-template-columns:minmax(190px,.85fr) minmax(190px,.85fr) minmax(240px,1.4fr); gap:12px; padding:13px 15px; margin-bottom:14px; border-left:5px solid var(--orange); border-radius:13px; background:linear-gradient(110deg,#d8eaf4,#edf6fa); box-shadow:0 5px 16px rgba(22,76,111,.07); }
-.filters-panel label > span { display:block; margin:0 0 5px 2px; color:#34556e; font-size:.7rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
-.filters-panel select,.filters-panel button { width:100%; min-height:38px; border:1px solid #b3cfdf; border-radius:9px; background:rgba(255,255,255,.84); color:#183f5d; font:inherit; font-size:.8rem; font-weight:600; }
-.filters-panel select { padding:0 14px; outline:none; }
-.filters-panel select:focus { border-color:#5598c1; box-shadow:0 0 0 3px rgba(34,129,186,.14); }
+.filters-panel { display:grid; grid-template-columns:minmax(190px,.85fr) minmax(300px,1.2fr) minmax(240px,1.2fr); gap:12px; padding:13px 15px; margin-bottom:14px; border-left:5px solid var(--orange); border-radius:13px; background:linear-gradient(110deg,#d8eaf4,#edf6fa); box-shadow:0 5px 16px rgba(22,76,111,.07); }
+.filters-panel label > span,.date-range-filter > span { display:block; margin:0 0 5px 2px; color:#34556e; font-size:.7rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+.filters-panel select,.filters-panel input,.filters-panel button { width:100%; min-height:38px; border:1px solid #b3cfdf; border-radius:9px; background:rgba(255,255,255,.84); color:#183f5d; font:inherit; font-size:.8rem; font-weight:600; }
+.filters-panel select,.filters-panel input { padding:0 14px; outline:none; }
+.filters-panel select:focus,.filters-panel input:focus { border-color:#5598c1; box-shadow:0 0 0 3px rgba(34,129,186,.14); }
+.date-range-filter > div { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+.date-range-filter label { position:relative; }
+.date-range-filter small { position:absolute; z-index:1; top:-6px; left:10px; padding:0 4px; background:#e8f2f7; color:#587387; font-size:.58rem; font-weight:700; text-transform:uppercase; }
 .filters-panel button { align-self:end; display:flex; align-items:center; justify-content:center; gap:9px; color:#0766a2; cursor:pointer; transition:.15s ease; }
 .filters-panel button:hover { transform:translateY(-1px); box-shadow:0 7px 18px rgba(26,98,143,.12); }
 .metrics { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-bottom:14px; }
