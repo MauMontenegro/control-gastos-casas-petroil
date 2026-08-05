@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Payment, PaymentStatus } from '~/types'
+import type { CalendarEvent, Payment, PaymentStatus } from '~/types'
 
 interface CalendarDay {
   date: Date
@@ -9,9 +9,11 @@ interface CalendarDay {
   isFriday: boolean
   payments: Payment[]
   paymentBatch: Payment[]
+  events: CalendarEvent[]
 }
 
 const store = usePaymentsStore()
+const eventsStore = useCalendarEventsStore()
 
 const monthNames = [
   'enero',
@@ -51,6 +53,7 @@ const branchFilter = ref('Todas')
 
 onMounted(async () => {
   await store.fetchPayments()
+  eventsStore.fetchEvents()
 
   const firstPending = store.items
     .filter((payment) => payment.status !== 'pagado')
@@ -90,6 +93,26 @@ function dateKey(date: Date): string {
 
 function sameDate(a: Date, b: Date): boolean {
   return dateKey(a) === dateKey(b)
+}
+
+function clampDayOfMonth(year: number, month: number, day: number): number {
+  const lastDay = new Date(year, month + 1, 0).getDate()
+  return Math.min(day, lastDay)
+}
+
+// Los recordatorios "mensual" no guardan una fecha fija, sino un día del mes
+// (ajustado a meses cortos, ej. día 31 -> 28/29 en febrero); los "unico" sí
+// tienen una fecha exacta. Se evalúan por celda del calendario, no por mes
+// enfocado, porque la grilla incluye días de meses vecinos.
+function eventsForDay(date: Date): CalendarEvent[] {
+  return eventsStore.items.filter((event) => {
+    if (!event.activo) return false
+    if (event.recurrencia === 'unico') return event.fecha === dateKey(date)
+    if (event.recurrencia === 'mensual' && event.diaDelMes) {
+      return date.getDate() === clampDayOfMonth(date.getFullYear(), date.getMonth(), event.diaDelMes)
+    }
+    return false
+  })
 }
 
 function previousOrSameFriday(date: Date): Date {
@@ -185,6 +208,7 @@ const calendarDays = computed<CalendarDay[]>(() => {
       isFriday: date.getDay() === 5,
       payments: paymentsByDueDate.value.get(key) ?? [],
       paymentBatch: batchesByFriday.value.get(key) ?? [],
+      events: eventsForDay(date),
     }
   })
 })
@@ -201,6 +225,7 @@ const selectedDay = computed(
       isFriday: selectedDate.value.getDay() === 5,
       payments: paymentsByDueDate.value.get(dateKey(selectedDate.value)) ?? [],
       paymentBatch: batchesByFriday.value.get(dateKey(selectedDate.value)) ?? [],
+      events: eventsForDay(selectedDate.value),
     },
 )
 
@@ -277,6 +302,36 @@ function selectDay(day: CalendarDay) {
     focusDate.value = new Date(day.date.getFullYear(), day.date.getMonth(), 1)
   }
 }
+
+const showEventDialog = ref(false)
+const editingEvent = ref<CalendarEvent | null>(null)
+const deletingEventId = ref<string | null>(null)
+const eventActionError = ref<string | null>(null)
+
+function openNewEvent() {
+  editingEvent.value = null
+  showEventDialog.value = true
+}
+
+function openEditEvent(event: CalendarEvent) {
+  editingEvent.value = event
+  showEventDialog.value = true
+}
+
+async function removeEvent(event: CalendarEvent) {
+  deletingEventId.value = event.id
+  eventActionError.value = null
+  try {
+    await eventsStore.deleteEvent(event.id)
+  } catch (e) {
+    console.error('Error al eliminar el recordatorio:', e)
+    const fetchError = e as { data?: { message?: string }; message?: string }
+    eventActionError.value =
+      fetchError.data?.message || fetchError.message || 'No se pudo eliminar el recordatorio.'
+  } finally {
+    deletingEventId.value = null
+  }
+}
 </script>
 
 <template>
@@ -286,13 +341,36 @@ function selectDay(day: CalendarDay) {
         <h1>Calendario de pagos y vencimientos</h1>
         <span>Anticipa vencimientos y organiza los pagos del periodo.</span>
       </div>
-      <v-btn class="today-button" prepend-icon="mdi-calendar-today" variant="flat" @click="goToToday">
-        Ir a hoy
-      </v-btn>
-    </header>
+      <div class="d-flex ga-2">
+        <v-btn
+          color="secondary"
+          variant="outlined"
+          prepend-icon="mdi-bell-plus-outline"
+          @click="openNewEvent"
+        >
+          Nuevo recordatorio
+        </v-btn>
+        <v-btn color="primary" prepend-icon="mdi-calendar-today" variant="flat" @click="goToToday">
+          Ir a hoy
+        </v-btn>
+      </div>
+      </header>
 
     <v-alert v-if="store.error" type="error" variant="tonal" class="mb-4">
       {{ store.error }}
+    </v-alert>
+    <v-alert v-if="eventsStore.error" type="error" variant="tonal" class="mb-4">
+      {{ eventsStore.error }}
+    </v-alert>
+    <v-alert
+      v-if="eventActionError"
+      type="error"
+      variant="tonal"
+      closable
+      class="mb-4"
+      @click:close="eventActionError = null"
+    >
+      {{ eventActionError }}
     </v-alert>
 
     <v-card class="calendar-shell" elevation="0">
@@ -394,6 +472,10 @@ function selectDay(day: CalendarDay) {
               <div class="day-heading">
                 <span class="day-number">{{ day.date.getDate() }}</span>
                 <span v-if="day.isToday" class="today-label">HOY</span>
+                <span v-if="day.events.length" class="reminder-badge">
+                  <v-icon icon="mdi-bell-outline" size="11" />
+                  {{ day.events.length }}
+                </span>
               </div>
 
               <div v-if="day.isFriday" class="payday-banner">
@@ -528,8 +610,45 @@ function selectDay(day: CalendarDay) {
             </div>
           </div>
 
+          <div v-if="selectedDay.events.length" class="panel-section">
+            <p class="panel-section-title">Recordatorios</p>
+            <div v-for="event in selectedDay.events" :key="`event-${event.id}`" class="payment-row">
+              <div class="payment-icon">
+                <v-icon icon="mdi-bell-outline" size="18" />
+              </div>
+              <div class="payment-info">
+                <strong>{{ event.tipoPago }} · {{ event.casaNombre }}</strong>
+                <span>
+                  {{ event.recurrencia === 'mensual' ? 'Cada mes' : 'Único' }}
+                  <template v-if="event.nota"> · {{ event.nota }}</template>
+                </span>
+              </div>
+              <div class="d-flex ga-1">
+                <v-btn
+                  icon="mdi-pencil-outline"
+                  variant="text"
+                  size="x-small"
+                  density="comfortable"
+                  @click="openEditEvent(event)"
+                />
+                <v-btn
+                  icon="mdi-trash-can-outline"
+                  variant="text"
+                  size="x-small"
+                  density="comfortable"
+                  :loading="deletingEventId === event.id"
+                  @click="removeEvent(event)"
+                />
+              </div>
+            </div>
+          </div>
+
           <div
-            v-if="!selectedDay.paymentBatch.length && !selectedDay.payments.length"
+            v-if="
+              !selectedDay.paymentBatch.length &&
+              !selectedDay.payments.length &&
+              !selectedDay.events.length
+            "
             class="empty-day"
           >
             <span class="empty-day__icon">
@@ -559,6 +678,10 @@ function selectDay(day: CalendarDay) {
         </aside>
       </div>
     </v-card>
+
+    <CalendarEventFormDialog v-model="showEventDialog" :editing-event="editingEvent" />
+
+    
   </div>
 </template>
 
@@ -933,7 +1056,18 @@ function selectDay(day: CalendarDay) {
   font-size: 0.58rem;
   font-weight: 900;
   letter-spacing: 0.08em;
-  background: #fff0e6;
+}
+
+.reminder-badge {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 6px;
+  border-radius: 99px;
+  background: rgb(var(--v-theme-secondary), 0.12);
+  color: rgb(var(--v-theme-secondary));
+  font-size: 0.62rem;
+  font-weight: 800;
 }
 
 .payday-banner {

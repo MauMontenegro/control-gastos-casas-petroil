@@ -51,6 +51,74 @@ const sippStatusColor: Record<SippStatus, string> = {
 const pendingAmount = computed(() => store.pending.reduce((sum, r) => sum + r.total, 0))
 const approvedAmount = computed(() => store.approved.reduce((sum, r) => sum + r.total, 0))
 
+const filters = reactive({
+  folio: '',
+  dateFrom: '',
+  dateTo: '',
+  status: 'Todos',
+  casa: 'Todas',
+  sippStatus: 'Todos',
+})
+
+function clearFilters() {
+  filters.folio = ''
+  filters.dateFrom = ''
+  filters.dateTo = ''
+  filters.status = 'Todos'
+  filters.casa = 'Todas'
+  filters.sippStatus = 'Todos'
+}
+
+const hasActiveFilters = computed(
+  () =>
+    !!filters.folio ||
+    !!filters.dateFrom ||
+    !!filters.dateTo ||
+    filters.status !== 'Todos' ||
+    filters.casa !== 'Todas' ||
+    filters.sippStatus !== 'Todos',
+)
+
+const statusOptions = computed(() => [
+  { title: 'Todos', value: 'Todos' },
+  ...(['en-revision', 'autorizada', 'correccion'] as FundRequestStatus[]).map((value) => ({
+    title: t(`status.${value}`),
+    value,
+  })),
+])
+
+const sippStatusOptions = computed(() => [
+  { title: 'Todos', value: 'Todos' },
+  ...(Object.keys(sippStatusLabel) as SippStatus[]).map((value) => ({
+    title: sippStatusLabel[value],
+    value,
+  })),
+])
+
+const casaFilterOptions = computed(() => [
+  'Todas',
+  ...new Set(store.items.flatMap((item) => item.concepts.map((c) => c.casa))),
+])
+
+const filteredItems = computed(() => {
+  const folioTerm = filters.folio.trim().toLocaleLowerCase('es')
+  return store.items.filter((item) => {
+    const folio = (item.sippFolio || item.folio).toLocaleLowerCase('es')
+    if (folioTerm && !folio.includes(folioTerm)) return false
+    if (filters.dateFrom && item.requiredDate < filters.dateFrom) return false
+    if (filters.dateTo && item.requiredDate > filters.dateTo) return false
+    if (filters.status !== 'Todos' && item.status !== filters.status) return false
+    if (filters.casa !== 'Todas' && !item.concepts.some((c) => c.casa === filters.casa))
+      return false
+    if (
+      filters.sippStatus !== 'Todos' &&
+      (item.sippStatus ?? 'no-enviada') !== filters.sippStatus
+    )
+      return false
+    return true
+  })
+})
+
 const showDetailModal = ref(false)
 const detailRequest = ref<FundRequest | null>(null)
 
@@ -142,34 +210,124 @@ async function uploadSelectedToSipp() {
       {{ sippSuccessMessage }}
     </v-alert>
 
-    <div class="request-metrics">
-      <article class="request-metric request-metric--blue">
-        <span>Pendientes</span>
-        <strong>{{ store.pending.length }}</strong>
-        <small>{{ formatCurrency(pendingAmount) }}</small>
-      </article>
-      <article class="request-metric request-metric--orange">
-        <span>En aprobación</span>
-        <strong>{{ store.pending.length }}</strong>
-        <small>Requieren decisión</small>
-      </article>
-      <article class="request-metric request-metric--green">
-        <span>Autorizadas</span>
-        <strong>{{ store.approved.length }}</strong>
-        <small>{{ formatCurrency(approvedAmount) }}</small>
-      </article>
-      <article class="request-metric request-metric--yellow">
-        <span>Corrección / rechazo</span>
-        <strong>{{ store.rejected.length }}</strong>
-        <small>Requieren ajustes</small>
-      </article>
-    </div>
+    <v-row class="mb-2">
+      <v-col cols="6" sm="3">
+        <v-card class="pa-4">
+          <span class="text-caption text-medium-emphasis d-block">Pendientes</span>
+          <strong class="text-h6 d-block">{{ store.pending.length }}</strong>
+          <small class="text-caption text-medium-emphasis">{{
+            formatCurrency(pendingAmount)
+          }}</small>
+        </v-card>
+      </v-col>
+      <v-col cols="6" sm="3">
+        <v-card class="pa-4">
+          <span class="text-caption text-medium-emphasis d-block">En aprobación</span>
+          <strong class="text-h6 d-block">{{ store.pending.length }}</strong>
+          <small class="text-caption text-medium-emphasis">Requieren decisión</small>
+        </v-card>
+      </v-col>
+      <v-col cols="6" sm="3">
+        <v-card class="pa-4">
+          <span class="text-caption text-medium-emphasis d-block">Autorizadas</span>
+          <strong class="text-h6 d-block">{{ store.approved.length }}</strong>
+          <small class="text-caption text-medium-emphasis">{{
+            formatCurrency(approvedAmount)
+          }}</small>
+        </v-card>
+      </v-col>
+      <v-col cols="6" sm="3">
+        <v-card class="pa-4">
+          <span class="text-caption text-medium-emphasis d-block">Corrección / rechazo</span>
+          <strong class="text-h6 d-block">{{ store.rejected.length }}</strong>
+          <small class="text-caption text-medium-emphasis">Requieren ajustes</small>
+        </v-card>
+      </v-col>
+    </v-row>
+
+    <v-card class="pa-4 mb-4">
+      <v-row dense align="center">
+        <v-col cols="12" sm="6" md="2">
+          <v-text-field
+            v-model="filters.folio"
+            label="Folio"
+            placeholder="Buscar folio..."
+            prepend-inner-icon="mdi-magnify"
+            density="comfortable"
+            clearable
+            hide-details
+          />
+        </v-col>
+        <v-col cols="6" sm="3" md="2">
+          <v-text-field
+            v-model="filters.dateFrom"
+            type="date"
+            label="Desde"
+            density="comfortable"
+            clearable
+            hide-details
+          />
+        </v-col>
+        <v-col cols="6" sm="3" md="2">
+          <v-text-field
+            v-model="filters.dateTo"
+            type="date"
+            label="Hasta"
+            density="comfortable"
+            clearable
+            hide-details
+          />
+        </v-col>
+        <v-col cols="6" sm="4" md="2">
+          <v-select
+            v-model="filters.status"
+            :items="statusOptions"
+            label="Estado"
+            density="comfortable"
+            hide-details
+          />
+        </v-col>
+        <v-col cols="6" sm="4" md="2">
+          <v-select
+            v-model="filters.casa"
+            :items="casaFilterOptions"
+            label="Casa"
+            density="comfortable"
+            hide-details
+          />
+        </v-col>
+        <v-col cols="6" sm="4" md="2">
+          <v-select
+            v-model="filters.sippStatus"
+            :items="sippStatusOptions"
+            label="Estado SIPP"
+            density="comfortable"
+            hide-details
+          />
+        </v-col>
+      </v-row>
+      <div class="d-flex justify-space-between align-center mt-3">
+        <v-btn
+          v-if="hasActiveFilters"
+          variant="text"
+          size="small"
+          prepend-icon="mdi-filter-off-outline"
+          @click="clearFilters"
+        >
+          Limpiar filtros
+        </v-btn>
+        <span v-else />
+        <span class="text-caption text-medium-emphasis">
+          {{ filteredItems.length }} de {{ store.items.length }} solicitudes
+        </span>
+      </div>
+    </v-card>
 
     <v-card class="requests-table-card" elevation="0">
       <v-data-table
         v-model="selected"
         :headers="headers"
-        :items="store.items"
+        :items="filteredItems"
         :loading="store.loading"
         item-value="id"
         show-select
