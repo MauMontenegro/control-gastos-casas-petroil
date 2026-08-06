@@ -136,13 +136,38 @@ function exportDashboard() {
 
     <div class="filters-panel">
       <label>
-        <span>Sucursal</span>
-        <v-select v-model="selectedBranch" :items="branches" density="compact" hide-details />
+        <span>Casa Petroil</span>
+        <v-select
+          v-model="selectedCasaId"
+          :items="casaOptions"
+          :loading="casas.loading"
+          :disabled="casas.loading"
+          density="compact"
+          hide-details
+        />
       </label>
       <div class="date-range-filter">
         <span>Periodo</span>
-        <v-select v-model="selectedPeriod" :items="periods" density="compact" hide-details />
-      </label>
+        <div>
+          <v-text-field
+            v-model="dateFrom"
+            type="date"
+            label="Desde"
+            :max="dateTo"
+            density="compact"
+            hide-details
+          />
+          <v-text-field
+            v-model="dateTo"
+            type="date"
+            label="Hasta"
+            :min="dateFrom"
+            :max="today"
+            density="compact"
+            hide-details
+          />
+        </div>
+      </div>
       <button type="button" @click="exportDashboard">
         <v-icon icon="mdi-download-outline" size="20" /> Descargar resumen
       </button>
@@ -252,8 +277,9 @@ function exportDashboard() {
 .dashboard__heading h1 { margin:0; color:#123c56; font-size:clamp(1.28rem,1.8vw,1.6rem); font-weight:600; letter-spacing:-.02em; line-height:1.2; }
 .dashboard__heading div > span { display:block; margin-top:3px; color:#506f82; font-size:11px; }
 .dashboard__heading > small { display:flex; align-items:center; gap:7px; color:#42677d; font-weight:700; }
-.filters-panel { display:grid; grid-template-columns:minmax(190px,.85fr) minmax(190px,.85fr) minmax(240px,1.4fr); gap:12px; padding:13px 15px; margin-bottom:14px; border-left:5px solid var(--orange); border-radius:13px; background:#d8eaf4; box-shadow:0 5px 16px rgba(22,76,111,.07); }
-.filters-panel label > span { display:block; margin:0 0 5px 2px; color:#34556e; font-size:.7rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+.filters-panel { display:grid; grid-template-columns:minmax(190px,.85fr) minmax(300px,1.2fr) minmax(240px,1.2fr); gap:12px; padding:13px 15px; margin-bottom:14px; border-left:5px solid var(--orange); border-radius:13px; background:#d8eaf4; box-shadow:0 5px 16px rgba(22,76,111,.07); }
+.filters-panel label > span,.date-range-filter > span { display:block; margin:0 0 5px 2px; color:#34556e; font-size:.7rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+.date-range-filter > div { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
 .filters-panel button { width:100%; min-height:38px; border:1px solid #b3cfdf; border-radius:9px; background:rgba(255,255,255,.84); color:#183f5d; font:inherit; font-size:.8rem; font-weight:600; }
 .filters-panel :deep(.v-field) { min-height:38px; border:1px solid #b3cfdf; border-radius:9px; background:rgba(255,255,255,.84); color:#183f5d; font-size:.8rem; font-weight:600; }
 .filters-panel :deep(.v-field__input) { min-height:38px; padding-top:3px; padding-bottom:3px; }

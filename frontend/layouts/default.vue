@@ -1,15 +1,23 @@
 <script setup lang="ts">
 import { useAuth0 } from '@auth0/auth0-vue'
+import { calendarDateKey, calendarEventOccursOn } from '~/utils/calendarEventDates'
 
 const auth0 = useAuth0()
 const user = computed(() => auth0?.user.value)
 const { t } = useI18n()
 const route = useRoute()
 const payments = usePaymentsStore()
+const calendarEvents = useCalendarEventsStore()
 const pendingOpen = ref(true)
-const pendingCount = computed(
+const pendingPaymentsCount = computed(
   () => payments.items.filter((payment) => payment.status !== 'pagado').length,
 )
+const today = useNow({ interval: 60_000 })
+const todayKey = computed(() => calendarDateKey(today.value))
+const todayReminders = computed(() =>
+  calendarEvents.items.filter((event) => calendarEventOccursOn(event, today.value)),
+)
+const pendingCount = computed(() => pendingPaymentsCount.value + todayReminders.value.length)
 
 const navItems = [
   { key: 'solicitudes', to: '/solicitudes', icon: 'mdi-file-document-outline' },
@@ -23,6 +31,7 @@ const navItems = [
 
 onMounted(() => {
   if (!payments.items.length) payments.fetchPayments()
+  if (!calendarEvents.items.length) calendarEvents.fetchEvents()
 })
 
 function handleLogout() {
@@ -69,14 +78,45 @@ function handleLogout() {
         </div>
 
         <div v-if="pendingOpen" class="pending-popover">
-          <div>
+          <div class="pending-popover__heading">
             <span>Pendientes de hoy</span>
-            <strong>{{ pendingCount }} pagos requieren revisión</strong>
+            <strong>
+              {{ pendingPaymentsCount }} pagos y {{ todayReminders.length }} recordatorios
+            </strong>
           </div>
-          <NuxtLink to="/pagos" @click="pendingOpen = false">Revisar pagos</NuxtLink>
-          <button type="button" aria-label="Cerrar panel de pendientes" @click="pendingOpen = false">
+          <button
+            type="button"
+            class="pending-popover__close"
+            aria-label="Cerrar panel de pendientes"
+            @click="pendingOpen = false"
+          >
             ×
           </button>
+          <div v-if="todayReminders.length" class="pending-reminders">
+            <NuxtLink
+              v-for="event in todayReminders"
+              :key="event.id"
+              :to="{ path: '/calendario', query: { fecha: todayKey, recordatorio: event.id } }"
+              @click="pendingOpen = false"
+            >
+              <v-icon icon="mdi-bell-ring-outline" size="17" />
+              <span>
+                <strong>{{ event.tipoPago }} · {{ event.casaNombre }}</strong>
+                <small>{{ event.nota || 'Recordatorio programado para hoy' }}</small>
+              </span>
+              <v-icon icon="mdi-chevron-right" size="17" />
+            </NuxtLink>
+          </div>
+          <div class="pending-popover__actions">
+            <NuxtLink to="/pagos" @click="pendingOpen = false">Revisar pagos</NuxtLink>
+            <NuxtLink
+              v-if="todayReminders.length"
+              :to="{ path: '/calendario', query: { fecha: todayKey } }"
+              @click="pendingOpen = false"
+            >
+              Ver calendario
+            </NuxtLink>
+          </div>
         </div>
 
         <nav class="top-tabs" aria-label="Navegación principal">
@@ -319,11 +359,12 @@ function handleLogout() {
   z-index: 100;
   top: 61px;
   right: 58px;
-  display: grid;
-  width: 320px;
-  grid-template-columns: 1fr auto 24px;
-  align-items: center;
-  gap: 12px;
+  display: flex;
+  width: min(390px, calc(100vw - 32px));
+  max-height: min(520px, calc(100vh - 150px));
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
   padding: 13px 14px;
   border: 1px solid #cbdde7;
   border-top: 4px solid #f27a1a;
@@ -347,35 +388,28 @@ function handleLogout() {
   transform: rotate(45deg);
 }
 
-.pending-popover > div {
+.pending-popover__heading {
   display: flex;
   min-width: 0;
   flex-direction: column;
+  padding-right: 30px;
 }
 
-.pending-popover > div span {
+.pending-popover__heading span {
   color: #6e8494;
   font-size: 0.64rem;
 }
 
-.pending-popover > div strong {
+.pending-popover__heading strong {
   margin-top: 2px;
   font-size: 0.72rem;
   font-weight: 600;
 }
 
-.pending-popover > a {
-  padding: 7px 9px;
-  border-radius: 6px;
-  background: #075b84;
-  color: #fff;
-  font-size: 0.65rem;
-  font-weight: 600;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.pending-popover > button {
+.pending-popover__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
   display: grid;
   width: 23px;
   height: 23px;
@@ -387,6 +421,75 @@ function handleLogout() {
   color: #637b8c;
   font-size: 0.9rem;
   cursor: pointer;
+}
+
+.pending-reminders {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pending-reminders > a {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 18px;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border: 1px solid #e5d4c7;
+  border-radius: 8px;
+  background: #fff8f2;
+  color: #173d59;
+  text-decoration: none;
+}
+
+.pending-reminders > a:hover {
+  border-color: #f27a1a;
+  background: #fff2e8;
+}
+
+.pending-reminders > a > span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.pending-reminders strong,
+.pending-reminders small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pending-reminders strong {
+  font-size: 0.7rem;
+}
+
+.pending-reminders small {
+  margin-top: 2px;
+  color: #6e8494;
+  font-size: 0.62rem;
+}
+
+.pending-popover__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 7px;
+  padding-top: 3px;
+}
+
+.pending-popover__actions > a {
+  padding: 7px 9px;
+  border-radius: 6px;
+  background: #075b84;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.pending-popover__actions > a:last-child {
+  background: #f27a1a;
 }
 
 .top-tabs {

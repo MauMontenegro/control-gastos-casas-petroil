@@ -1,5 +1,12 @@
 <script setup lang="ts">
 import type { CalendarEvent, Payment, PaymentStatus } from '~/types'
+import {
+  calendarDateKey,
+  calendarEventOccursOn,
+  eventOccurrenceForPaymentFriday,
+  parseCalendarDate,
+  previousOrSameFriday,
+} from '~/utils/calendarEventDates'
 
 interface CalendarDay {
   date: Date
@@ -10,10 +17,12 @@ interface CalendarDay {
   payments: Payment[]
   paymentBatch: Payment[]
   events: CalendarEvent[]
+  eventBatch: Array<{ event: CalendarEvent; dueDate: Date }>
 }
 
 const store = usePaymentsStore()
 const eventsStore = useCalendarEventsStore()
+const route = useRoute()
 
 const monthNames = [
   'enero',
@@ -51,9 +60,20 @@ const selectedDate = ref(new Date())
 const serviceFilter = ref('Todos')
 const branchFilter = ref('Todas')
 
+function applyRouteSelection(): boolean {
+  const requestedDate =
+    typeof route.query.fecha === 'string' ? parseCalendarDate(route.query.fecha) : null
+  if (!requestedDate) return false
+
+  focusDate.value = new Date(requestedDate.getFullYear(), requestedDate.getMonth(), 1)
+  selectedDate.value = requestedDate
+  return true
+}
+
 onMounted(async () => {
-  await store.fetchPayments()
-  eventsStore.fetchEvents()
+  await Promise.all([store.fetchPayments(), eventsStore.fetchEvents()])
+
+  if (applyRouteSelection()) return
 
   const firstPending = store.items
     .filter((payment) => payment.status !== 'pagado')
@@ -65,6 +85,11 @@ onMounted(async () => {
     selectedDate.value = firstPending
   }
 })
+
+watch(
+  () => [route.query.fecha, route.query.recordatorio],
+  () => applyRouteSelection(),
+)
 
 function normalizeText(value: string): string {
   return value
@@ -85,19 +110,11 @@ function parseDueDate(dueDate: string): Date {
 }
 
 function dateKey(date: Date): string {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
+  return calendarDateKey(date)
 }
 
 function sameDate(a: Date, b: Date): boolean {
   return dateKey(a) === dateKey(b)
-}
-
-function clampDayOfMonth(year: number, month: number, day: number): number {
-  const lastDay = new Date(year, month + 1, 0).getDate()
-  return Math.min(day, lastDay)
 }
 
 // Los recordatorios "mensual" no guardan una fecha fija, sino un día del mes
@@ -105,21 +122,15 @@ function clampDayOfMonth(year: number, month: number, day: number): number {
 // tienen una fecha exacta. Se evalúan por celda del calendario, no por mes
 // enfocado, porque la grilla incluye días de meses vecinos.
 function eventsForDay(date: Date): CalendarEvent[] {
-  return eventsStore.items.filter((event) => {
-    if (!event.activo) return false
-    if (event.recurrencia === 'unico') return event.fecha === dateKey(date)
-    if (event.recurrencia === 'mensual' && event.diaDelMes) {
-      return date.getDate() === clampDayOfMonth(date.getFullYear(), date.getMonth(), event.diaDelMes)
-    }
-    return false
-  })
+  return eventsStore.items.filter((event) => calendarEventOccursOn(event, date))
 }
 
-function previousOrSameFriday(date: Date): Date {
-  const paymentDay = new Date(date.getFullYear(), date.getMonth(), date.getDate())
-  const daysSinceFriday = (paymentDay.getDay() - 5 + 7) % 7
-  paymentDay.setDate(paymentDay.getDate() - daysSinceFriday)
-  return paymentDay
+function eventBatchForFriday(friday: Date): Array<{ event: CalendarEvent; dueDate: Date }> {
+  if (friday.getDay() !== 5) return []
+  return eventsStore.items.flatMap((event) => {
+    const dueDate = eventOccurrenceForPaymentFriday(event, friday)
+    return dueDate ? [{ event, dueDate }] : []
+  })
 }
 
 function formatShortDate(date: Date): string {
@@ -209,6 +220,7 @@ const calendarDays = computed<CalendarDay[]>(() => {
       payments: paymentsByDueDate.value.get(key) ?? [],
       paymentBatch: batchesByFriday.value.get(key) ?? [],
       events: eventsForDay(date),
+      eventBatch: eventBatchForFriday(date),
     }
   })
 })
@@ -226,6 +238,7 @@ const selectedDay = computed(
       payments: paymentsByDueDate.value.get(dateKey(selectedDate.value)) ?? [],
       paymentBatch: batchesByFriday.value.get(dateKey(selectedDate.value)) ?? [],
       events: eventsForDay(selectedDate.value),
+      eventBatch: eventBatchForFriday(selectedDate.value),
     },
 )
 
@@ -244,6 +257,9 @@ const selectedBatchTotal = computed(() =>
 )
 const selectedPendingCaptureCount = computed(
   () => selectedDay.value.paymentBatch.filter((payment) => !hasConfirmedAmount(payment)).length,
+)
+const highlightedEventId = computed(() =>
+  typeof route.query.recordatorio === 'string' ? route.query.recordatorio : null,
 )
 
 const statusColor: Record<PaymentStatus, string> = {
@@ -288,6 +304,8 @@ function daySummary(day: CalendarDay): string {
   if (day.isFriday) parts.push('día de pago')
   if (day.payments.length) parts.push(`${day.payments.length} vencimientos`)
   if (day.paymentBatch.length) parts.push(`${day.paymentBatch.length} pagos programados`)
+  if (day.events.length) parts.push(`${day.events.length} recordatorios`)
+  if (day.eventBatch.length) parts.push(`${day.eventBatch.length} recordatorios por preparar`)
   return parts.join(', ')
 }
 
@@ -542,7 +560,7 @@ async function removeEvent(event: CalendarEvent) {
             <div class="selected-payday__summary">
               <div>
                 <span>Compromisos</span>
-                <strong>{{ selectedDay.paymentBatch.length }}</strong>
+                <strong>{{ selectedDay.paymentBatch.length + selectedDay.eventBatch.length }}</strong>
               </div>
               <div class="selected-payday__amount">
                 <span>Monto programado</span>
@@ -586,6 +604,25 @@ async function removeEvent(event: CalendarEvent) {
             </div>
           </div>
 
+          <div v-if="selectedDay.eventBatch.length" class="panel-section reminder-preparation">
+            <p class="panel-section-title">Recordatorios por preparar este viernes</p>
+            <div
+              v-for="item in selectedDay.eventBatch"
+              :key="`event-batch-${item.event.id}`"
+              class="payment-row"
+            >
+              <div class="payment-icon reminder-icon">
+                <v-icon icon="mdi-bell-check-outline" size="18" />
+              </div>
+              <div class="payment-info">
+                <strong>{{ item.event.tipoPago }} · {{ item.event.casaNombre }}</strong>
+                <span>Fecha del recordatorio: {{ formatShortDate(item.dueDate) }}</span>
+                <small v-if="item.event.nota">{{ item.event.nota }}</small>
+              </div>
+              <v-chip color="secondary" size="x-small" variant="tonal">Preparar</v-chip>
+            </div>
+          </div>
+
           <div v-if="selectedDay.payments.length" class="panel-section">
             <p class="panel-section-title">Vencen este día</p>
             <div
@@ -614,7 +651,12 @@ async function removeEvent(event: CalendarEvent) {
 
           <div v-if="selectedDay.events.length" class="panel-section">
             <p class="panel-section-title">Recordatorios</p>
-            <div v-for="event in selectedDay.events" :key="`event-${event.id}`" class="payment-row">
+            <div
+              v-for="event in selectedDay.events"
+              :key="`event-${event.id}`"
+              class="payment-row reminder-row"
+              :class="{ 'reminder-row--highlighted': highlightedEventId === event.id }"
+            >
               <div class="payment-icon">
                 <v-icon icon="mdi-bell-outline" size="18" />
               </div>
@@ -624,6 +666,7 @@ async function removeEvent(event: CalendarEvent) {
                   {{ event.recurrencia === 'mensual' ? 'Cada mes' : 'Único' }}
                   <template v-if="event.nota"> · {{ event.nota }}</template>
                 </span>
+                <small>Fecha: {{ formatShortDate(selectedDay.date) }}</small>
               </div>
               <div class="d-flex ga-1">
                 <v-btn
@@ -649,7 +692,8 @@ async function removeEvent(event: CalendarEvent) {
             v-if="
               !selectedDay.paymentBatch.length &&
               !selectedDay.payments.length &&
-              !selectedDay.events.length
+              !selectedDay.events.length &&
+              !selectedDay.eventBatch.length
             "
             class="empty-day"
           >
@@ -1317,6 +1361,30 @@ async function removeEvent(event: CalendarEvent) {
   background: rgba(var(--v-theme-secondary), 0.1);
 }
 
+.payment-icon.reminder-icon {
+  color: #c76518;
+  background: #fff0e4;
+}
+
+.reminder-preparation {
+  padding: 12px;
+  border: 1px solid #f4d2b8;
+  border-radius: 11px;
+  background: #fffaf6;
+}
+
+.reminder-row {
+  padding-right: 8px;
+  padding-left: 8px;
+  border-radius: 9px;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.reminder-row--highlighted {
+  background: #fff0e4;
+  box-shadow: inset 3px 0 0 #ff791f;
+}
+
 .payment-info,
 .payment-amount {
   display: flex;
@@ -1330,6 +1398,15 @@ async function removeEvent(event: CalendarEvent) {
 .payment-info strong,
 .payment-info span {
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.payment-info small {
+  margin-top: 2px;
+  overflow: hidden;
+  color: rgba(var(--v-theme-on-surface), 0.68);
+  font-size: 0.62rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
