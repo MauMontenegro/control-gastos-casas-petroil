@@ -360,15 +360,15 @@ async function onSubmit() {
 
 :global(.reminder-select-menu) {
   overflow: hidden;
-  border: 1px solid #4c9cbe;
+  border: 1px solid #8fc5d9;
   border-radius: 14px !important;
-  background: #b9ddea !important;
+  background: #edf7fa !important;
   box-shadow: 0 14px 30px rgb(7 70 112 / 18%) !important;
 }
 
 :global(.reminder-select-menu .v-list) {
   padding: 7px;
-  background: #afd5e5 !important;
+  background: #edf7fa !important;
 }
 
 :global(.reminder-select-menu .v-list-item) {
@@ -380,11 +380,11 @@ async function onSubmit() {
 }
 
 :global(.reminder-select-menu .v-list-item:hover) {
-  background: #91c9df !important;
+  background: #d8edf5 !important;
 }
 
 :global(.reminder-select-menu .v-list-item--active) {
-  background: #78bbd6 !important;
+  background: #c2e2ef !important;
   color: #075f99 !important;
   font-weight: 700;
 }
