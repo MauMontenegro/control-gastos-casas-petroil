@@ -1,19 +1,40 @@
 <script setup lang="ts">
 const dashboard = useDashboardStore()
-const selectedBranch = ref('Todas las sucursales')
-const selectedPeriod = ref('Julio 2026')
-const periods = ['Julio 2026', 'Junio 2026', 'Mayo 2026', 'Abril 2026']
+const casas = useCasasStore()
+const selectedCasaId = ref<number | 'todas'>('todas')
 
-const branches = computed(() => [
-  'Todas las sucursales',
-  ...dashboard.branchBudget.map((item) => item.branch),
+function toDateInputValue(date: Date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+const currentDate = new Date()
+const today = toDateInputValue(currentDate)
+const dateFrom = ref(toDateInputValue(new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)))
+const dateTo = ref(today)
+
+const casaOptions = computed(() => [
+  { title: 'Todas las casas', value: 'todas' as const },
+  ...casas.items.map((casa) => ({
+    title: casa.empresa ? `${casa.nombre} · ${casa.empresa}` : casa.nombre,
+    value: casa.id,
+  })),
 ])
+const selectedCasaLabel = computed(
+  () =>
+    casaOptions.value.find((option) => option.value === selectedCasaId.value)?.title ??
+    'Todas las casas',
+)
 const totalSpend = computed(() =>
   dashboard.serviceSpend.reduce((total, item) => total + item.amount, 0),
 )
 const budgetUsedPct = computed(() => 100 - (dashboard.kpis?.availableBudgetPct ?? 0))
 
-onMounted(() => dashboard.fetchOverview())
+onMounted(() => {
+  void Promise.all([dashboard.fetchOverview(), casas.fetchCasas()])
+})
 
 const trendChart = computed(() => ({
   series: [
@@ -86,7 +107,7 @@ const donutChart = computed(() => ({
 
 function exportDashboard() {
   const rows = [
-    ['Resumen de gastos', selectedPeriod.value, selectedBranch.value],
+    ['Resumen de gastos', `Del ${dateFrom.value} al ${dateTo.value}`, selectedCasaLabel.value],
     [],
     ['Servicio', 'Importe', 'Participación'],
     ...dashboard.serviceSpend.map((item) => [item.service, item.amount, `${item.percentage}%`]),
@@ -118,7 +139,7 @@ function exportDashboard() {
         <span>Sucursal</span>
         <v-select v-model="selectedBranch" :items="branches" density="compact" hide-details />
       </label>
-      <label>
+      <div class="date-range-filter">
         <span>Periodo</span>
         <v-select v-model="selectedPeriod" :items="periods" density="compact" hide-details />
       </label>
