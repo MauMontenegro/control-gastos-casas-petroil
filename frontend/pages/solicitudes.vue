@@ -59,6 +59,12 @@ const filters = reactive({
   casa: 'Todas',
   sippStatus: 'Todos',
 })
+const quickStatusOptions = [
+  { label: 'Todos', value: 'Todos' },
+  { label: 'En aprobación', value: 'en-revision' },
+  { label: 'Autorizadas', value: 'autorizada' },
+  { label: 'Corrección', value: 'correccion' },
+]
 
 function clearFilters() {
   filters.folio = ''
@@ -78,14 +84,6 @@ const hasActiveFilters = computed(
     filters.casa !== 'Todas' ||
     filters.sippStatus !== 'Todos',
 )
-
-const statusOptions = computed(() => [
-  { title: 'Todos', value: 'Todos' },
-  ...(['en-revision', 'autorizada', 'correccion'] as FundRequestStatus[]).map((value) => ({
-    title: t(`status.${value}`),
-    value,
-  })),
-])
 
 const sippStatusOptions = computed(() => [
   { title: 'Todos', value: 'Todos' },
@@ -210,120 +208,46 @@ async function uploadSelectedToSipp() {
       {{ sippSuccessMessage }}
     </v-alert>
 
-    <v-row class="mb-2">
-      <v-col cols="6" sm="3">
-        <v-card class="pa-4">
-          <span class="text-caption text-medium-emphasis d-block">Pendientes</span>
-          <strong class="text-h6 d-block">{{ store.pending.length }}</strong>
-          <small class="text-caption text-medium-emphasis">{{
-            formatCurrency(pendingAmount)
-          }}</small>
-        </v-card>
-      </v-col>
-      <v-col cols="6" sm="3">
-        <v-card class="pa-4">
-          <span class="text-caption text-medium-emphasis d-block">En aprobación</span>
-          <strong class="text-h6 d-block">{{ store.pending.length }}</strong>
-          <small class="text-caption text-medium-emphasis">Requieren decisión</small>
-        </v-card>
-      </v-col>
-      <v-col cols="6" sm="3">
-        <v-card class="pa-4">
-          <span class="text-caption text-medium-emphasis d-block">Autorizadas</span>
-          <strong class="text-h6 d-block">{{ store.approved.length }}</strong>
-          <small class="text-caption text-medium-emphasis">{{
-            formatCurrency(approvedAmount)
-          }}</small>
-        </v-card>
-      </v-col>
-      <v-col cols="6" sm="3">
-        <v-card class="pa-4">
-          <span class="text-caption text-medium-emphasis d-block">Corrección / rechazo</span>
-          <strong class="text-h6 d-block">{{ store.rejected.length }}</strong>
-          <small class="text-caption text-medium-emphasis">Requieren ajustes</small>
-        </v-card>
-      </v-col>
-    </v-row>
+    <div class="request-metrics">
+      <article class="request-metric request-metric--blue">
+        <div><span>Pendientes</span><strong>{{ store.pending.length }}</strong><small>{{ formatCurrency(pendingAmount) }}</small></div>
+      </article>
+      <article class="request-metric request-metric--orange">
+        <div><span>En aprobación</span><strong>{{ store.pending.length }}</strong><small>Requieren decisión</small></div>
+      </article>
+      <article class="request-metric request-metric--green">
+        <div><span>Autorizadas</span><strong>{{ store.approved.length }}</strong><small>{{ formatCurrency(approvedAmount) }}</small></div>
+      </article>
+      <article class="request-metric request-metric--yellow">
+        <div><span>Corrección / rechazo</span><strong>{{ store.rejected.length }}</strong><small>Requieren ajustes</small></div>
+      </article>
+    </div>
 
-    <v-card class="pa-4 mb-4">
-      <v-row dense align="center">
-        <v-col cols="12" sm="6" md="2">
-          <v-text-field
-            v-model="filters.folio"
-            label="Folio"
-            placeholder="Buscar folio..."
-            prepend-inner-icon="mdi-magnify"
-            density="comfortable"
-            clearable
-            hide-details
-          />
-        </v-col>
-        <v-col cols="6" sm="3" md="2">
-          <v-text-field
-            v-model="filters.dateFrom"
-            type="date"
-            label="Desde"
-            density="comfortable"
-            clearable
-            hide-details
-          />
-        </v-col>
-        <v-col cols="6" sm="3" md="2">
-          <v-text-field
-            v-model="filters.dateTo"
-            type="date"
-            label="Hasta"
-            density="comfortable"
-            clearable
-            hide-details
-          />
-        </v-col>
-        <v-col cols="6" sm="4" md="2">
-          <v-select
-            v-model="filters.status"
-            :items="statusOptions"
-            label="Estado"
-            density="comfortable"
-            hide-details
-          />
-        </v-col>
-        <v-col cols="6" sm="4" md="2">
-          <v-select
-            v-model="filters.casa"
-            :items="casaFilterOptions"
-            label="Casa"
-            density="comfortable"
-            hide-details
-          />
-        </v-col>
-        <v-col cols="6" sm="4" md="2">
-          <v-select
-            v-model="filters.sippStatus"
-            :items="sippStatusOptions"
-            label="Estado SIPP"
-            density="comfortable"
-            hide-details
-          />
-        </v-col>
-      </v-row>
-      <div class="d-flex justify-space-between align-center mt-3">
-        <v-btn
-          v-if="hasActiveFilters"
-          variant="text"
-          size="small"
-          prepend-icon="mdi-filter-off-outline"
-          @click="clearFilters"
-        >
-          Limpiar filtros
-        </v-btn>
-        <span v-else />
-        <span class="text-caption text-medium-emphasis">
-          {{ filteredItems.length }} de {{ store.items.length }} solicitudes
-        </span>
+    <v-card class="requests-data-panel" elevation="0">
+      <div class="requests-filter-bar">
+        <div class="requests-filter-line">
+          <label class="requests-search">
+            <v-icon icon="mdi-magnify" size="23" />
+            <input v-model="filters.folio" type="search" placeholder="Buscar folio..." />
+            <span>{{ filteredItems.length }} resultados</span>
+          </label>
+
+          <label class="filter-field filter-field--status">
+            <span>Estado</span>
+            <v-select v-model="filters.status" :items="quickStatusOptions" item-title="label" item-value="value" aria-label="Estado" density="compact" hide-details />
+          </label>
+
+          <label class="filter-field filter-field--date"><span>Desde</span><v-text-field v-model="filters.dateFrom" type="date" aria-label="Desde" density="compact" clearable hide-details /></label>
+          <label class="filter-field filter-field--date"><span>Hasta</span><v-text-field v-model="filters.dateTo" type="date" aria-label="Hasta" density="compact" clearable hide-details /></label>
+          <label class="filter-field filter-field--select"><span>Casa Petroil</span><v-select v-model="filters.casa" :items="casaFilterOptions" aria-label="Casa Petroil" density="compact" hide-details /></label>
+          <label class="filter-field filter-field--select"><span>Estado SIPP</span><v-select v-model="filters.sippStatus" :items="sippStatusOptions" aria-label="Estado SIPP" density="compact" hide-details /></label>
+          <v-btn v-if="hasActiveFilters" class="clear-filter-button" variant="text" size="small" @click="clearFilters">
+            Limpiar
+          </v-btn>
+        </div>
       </div>
-    </v-card>
 
-    <v-card class="requests-table-card" elevation="0">
+    <div class="requests-table-card">
       <v-data-table
         v-model="selected"
         :headers="headers"
@@ -369,6 +293,7 @@ async function uploadSelectedToSipp() {
           </v-chip>
         </template>
       </v-data-table>
+    </div>
     </v-card>
 
     <RequestFormDialog v-model="showNewRequestModal" />
@@ -461,16 +386,28 @@ async function uploadSelectedToSipp() {
 .request-metric {
   position: relative;
   display: flex;
-  min-height: 96px;
+  min-height: 82px;
   overflow: hidden;
-  padding: 14px 16px;
-  flex-direction: column;
-  justify-content: center;
+  padding: 13px 15px;
+  align-items: center;
   border: 1px solid #d5e5ed;
   border-top: 4px solid var(--metric-color);
   border-radius: 12px;
   background: rgb(255 255 255 / 94%);
   box-shadow: 0 6px 16px rgb(20 67 98 / 7%);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.request-metric:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgb(20 67 98 / 13%);
+}
+
+.request-metric > div {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
 }
 
 .request-metric::after {
@@ -492,13 +429,173 @@ async function uploadSelectedToSipp() {
 .request-metric strong { margin: 3px 0 1px; color: #123c56; font-size: 1.25rem; line-height: 1.1; }
 .request-metric small { color: #728696; font-size: 0.65rem; }
 
-.requests-table-card {
+.requests-data-panel {
   overflow: hidden;
   border: 1px solid #b9d9e9;
   border-top: 4px solid #e9b224;
-  border-radius: 13px !important;
+  border-radius: 14px !important;
+  background: #fff;
+  box-shadow: 0 8px 24px rgb(28 52 68 / 7%) !important;
+}
+
+.requests-filter-bar {
+  padding: 10px 12px;
+  background: #f7fbfc;
+}
+
+.requests-filter-bar {
+  overflow-x: auto;
+}
+
+.requests-filter-line {
+  display: flex;
+  min-width: max-content;
+  align-items: center;
+  gap: 9px;
+}
+
+.requests-search {
+  display: grid;
+  width: min(360px, 31%);
+  min-width: 245px;
+  min-height: 42px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  padding: 0 12px;
+  border: 1px solid #b6d2df;
+  border-radius: 10px;
+  background: #fff;
+  color: #0877a8;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.requests-search:focus-within {
+  border-color: #0872a5;
+  box-shadow: 0 0 0 3px rgb(8 111 165 / 9%);
+}
+
+.requests-search input {
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  color: #183e5c;
+  font: inherit;
+  font-size: 0.75rem;
+}
+
+.requests-search input::placeholder {
+  color: #7891a3;
+}
+
+.requests-search > span {
+  color: #68869c;
+  font-size: 0.65rem;
+  white-space: nowrap;
+}
+
+.filter-field {
+  position: relative;
+  display: block;
+  padding-top: 9px;
+}
+
+.filter-field > span {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 10px;
+  padding: 0 5px;
+  background: #f7fbfc;
+  color: #315c75;
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.filter-field > :deep(.v-input) {
+  width: 100%;
+}
+
+.filter-field--date {
+  width: 145px;
+}
+
+.filter-field--status {
+  width: 155px;
+}
+
+.filter-field--select {
+  width: 160px;
+}
+
+.clear-filter-button {
+  min-width: 66px !important;
+  color: #d76518 !important;
+  font-size: 0.68rem !important;
+  font-weight: 700;
+}
+
+.requests-filter-bar :deep(.v-field) {
+  min-height: 39px;
+  border-radius: 9px;
+  border: 1px solid #9fc7d9;
+  background: rgb(255 255 255 / 88%);
+  color: #183e5c;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.75rem;
+}
+
+.requests-filter-bar :deep(.v-field:hover) {
+  border-color: #4d9fc1;
+  background: #fff;
+}
+
+.requests-filter-bar :deep(.v-field__prepend-inner),
+.requests-filter-bar :deep(.v-field__append-inner) {
+  color: #0877a8;
+}
+
+.requests-filter-bar :deep(.v-field__input) {
+  min-height: 39px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.requests-filter-bar :deep(.v-label) {
+  color: #397a9d;
+  font-size: 0.7rem;
+}
+
+.requests-filter-bar :deep(.v-field--focused) {
+  border-color: #0872a5;
+  box-shadow: 0 0 0 3px rgb(8 111 165 / 9%);
+}
+
+.requests-filter-footer {
+  display: flex;
+  min-height: 28px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 3px 0;
+  color: #617a8d;
+  font-size: 0.68rem;
+}
+
+.requests-filter-footer :deep(.v-btn) {
+  color: #d66518;
+  font-size: 0.68rem;
+  text-transform: none;
+}
+
+.requests-table-card {
+  overflow: hidden;
+  border: 0;
+  border-top: 1px solid #8ec5dd;
+  border-radius: 0;
   background: #eaf6fb;
-  box-shadow: 0 8px 22px rgb(20 67 98 / 8%);
+  box-shadow: none;
 }
 
 .requests-table-card :deep(.v-data-table) {
@@ -607,6 +704,7 @@ async function uploadSelectedToSipp() {
 
 @media (max-width: 900px) {
   .request-metrics { grid-template-columns: repeat(2, 1fr); }
+  .requests-search { width: 100%; }
 }
 
 @media (max-width: 640px) {

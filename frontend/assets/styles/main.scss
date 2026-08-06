@@ -115,6 +115,57 @@
   }
 }
 
+// Menús compartidos: los controles cerrados conservan el diseño de cada pantalla.
+.v-overlay__content > .v-list,
+.v-overlay-container .v-select__content {
+  overflow: hidden !important;
+  border: 1px solid #4c9cbe !important;
+  border-radius: 14px !important;
+  background: #afd5e5 !important;
+  box-shadow: 0 14px 30px rgba(7, 70, 112, 0.18) !important;
+}
+
+.v-overlay__content > .v-list,
+.v-select__content > .v-list {
+  padding: 7px !important;
+  background: #afd5e5 !important;
+}
+
+.v-overlay__content > .v-list .v-list-item,
+.v-select__content .v-list-item {
+  min-height: 40px;
+  margin: 3px 0;
+  border-radius: 9px;
+  color: #17445f;
+}
+
+.v-overlay__content > .v-list .v-list-item:hover,
+.v-select__content .v-list-item:hover {
+  background: #91c9df !important;
+}
+
+.v-overlay__content > .v-list .v-list-item--active,
+.v-select__content .v-list-item--active {
+  background: #78bbd6 !important;
+  color: #075f99 !important;
+  font-weight: 700;
+}
+
+.v-select__content .v-list-item__overlay {
+  border-radius: inherit;
+  background: transparent !important;
+  opacity: 0 !important;
+}
+
+// Los filtros usan un borde exterior propio; se oculta el contorno interno
+// de Vuetify para evitar que la línea atraviese sus etiquetas flotantes.
+.filters-panel .v-field__outline,
+.calendar-filters .v-field__outline,
+.requests-filter-bar .v-field__outline,
+.empresa-filter .v-field__outline {
+  display: none !important;
+}
+
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);

@@ -117,7 +117,7 @@ function handleLogout() {
   left: 0 !important;
   width: 100% !important;
   border-bottom: 0 !important;
-  background: linear-gradient(90deg, #003861 0%, #003f6c 62%, #004a76 100%) !important;
+  background: #064f7d !important;
   color: #fff !important;
   font-family: Arial, Helvetica, sans-serif;
   box-shadow: 0 8px 24px rgb(8 60 78 / 22%) !important;
@@ -399,7 +399,7 @@ function handleLogout() {
   margin: 0 -20px;
   padding: 4px 20px 0;
   border-top: 1px solid rgb(255 255 255 / 12%);
-  background: linear-gradient(90deg, #00345f 0%, #003d6d 52%, #00558a 100%);
+  background: #064f7d;
   scrollbar-width: none;
 }
 
@@ -449,7 +449,7 @@ function handleLogout() {
   border-radius: 11px 11px 0 0;
   border-color: rgb(255 255 255 / 15%);
   border-bottom: 4px solid #ff791f;
-  background: linear-gradient(180deg, #28668d, #1b587f);
+  background: #21709a;
   box-shadow: 0 4px 10px rgb(0 37 62 / 22%);
   color: #fff;
 }

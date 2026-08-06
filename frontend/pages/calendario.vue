@@ -810,6 +810,7 @@ async function removeEvent(event: CalendarEvent) {
 
 .calendar-filters :deep(.v-field) {
   min-height: 34px;
+  border: 1px solid #c8dce7;
   border-radius: 8px;
   background: rgb(255 255 255 / 88%);
   color: var(--petroil-blue-dark);
