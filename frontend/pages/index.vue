@@ -136,13 +136,16 @@ function exportDashboard() {
 
     <div class="filters-panel">
       <label>
-        <span>Sucursal</span>
-        <v-select v-model="selectedBranch" :items="branches" density="compact" hide-details />
+        <span>Casa</span>
+        <v-select v-model="selectedCasaId" :items="casaOptions" density="compact" hide-details />
       </label>
       <div class="date-range-filter">
         <span>Periodo</span>
-        <v-select v-model="selectedPeriod" :items="periods" density="compact" hide-details />
-      </label>
+        <div class="date-range-filter__inputs">
+          <v-text-field v-model="dateFrom" type="date" density="compact" hide-details />
+          <v-text-field v-model="dateTo" type="date" density="compact" hide-details />
+        </div>
+      </div>
       <button type="button" @click="exportDashboard">
         <v-icon icon="mdi-download-outline" size="20" /> Descargar resumen
       </button>
@@ -258,6 +261,8 @@ function exportDashboard() {
 .filters-panel :deep(.v-field) { min-height:38px; border:1px solid #b3cfdf; border-radius:9px; background:rgba(255,255,255,.84); color:#183f5d; font-size:.8rem; font-weight:600; }
 .filters-panel :deep(.v-field__input) { min-height:38px; padding-top:3px; padding-bottom:3px; }
 .filters-panel :deep(.v-field--focused) { border-color:#5598c1; box-shadow:0 0 0 3px rgba(34,129,186,.14); }
+.date-range-filter__inputs { display:flex; align-items:center; gap:6px; }
+.date-range-filter__inputs :deep(.v-field) { min-width:0; }
 .filters-panel button { align-self:end; display:flex; align-items:center; justify-content:center; gap:9px; color:#0766a2; cursor:pointer; transition:.15s ease; }
 .filters-panel button:hover { transform:translateY(-1px); box-shadow:0 7px 18px rgba(26,98,143,.12); }
 .metrics { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-bottom:14px; }

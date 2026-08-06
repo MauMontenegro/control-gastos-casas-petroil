@@ -16,7 +16,7 @@ export interface LimpiezaAsignacion {
   personaNombre: string
   banco: string
   tarjeta: string
-  cantidadSemanal: number
+  tarifaDiaria: number
   dias: LimpiezaDias
 }
 
@@ -25,7 +25,7 @@ export interface CreateLimpiezaAsignacionPayload {
   personaNombre: string
   banco: string
   tarjeta: string
-  cantidadSemanal: number
+  tarifaDiaria: number
 }
 
 export interface UpdateLimpiezaAsignacionPayload

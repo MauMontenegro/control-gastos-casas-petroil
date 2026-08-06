@@ -14,7 +14,7 @@ const casa = ref<number | null>(null)
 const personaNombre = ref('')
 const banco = ref('')
 const tarjeta = ref('')
-const cantidadSemanal = ref<number | null>(null)
+const tarifaDiaria = ref<number | null>(null)
 
 const submitting = ref(false)
 const submitError = ref<string | null>(null)
@@ -32,13 +32,13 @@ function resetForm() {
     personaNombre.value = props.editingAsignacion.personaNombre
     banco.value = props.editingAsignacion.banco
     tarjeta.value = props.editingAsignacion.tarjeta
-    cantidadSemanal.value = props.editingAsignacion.cantidadSemanal
+    tarifaDiaria.value = props.editingAsignacion.tarifaDiaria
   } else {
     casa.value = null
     personaNombre.value = ''
     banco.value = ''
     tarjeta.value = ''
-    cantidadSemanal.value = null
+    tarifaDiaria.value = null
   }
 }
 
@@ -54,8 +54,8 @@ const isValid = computed(
     !!personaNombre.value.trim() &&
     !!banco.value &&
     !!tarjeta.value.trim() &&
-    !!cantidadSemanal.value &&
-    cantidadSemanal.value > 0,
+    !!tarifaDiaria.value &&
+    tarifaDiaria.value > 0,
 )
 
 async function onSubmit() {
@@ -70,7 +70,7 @@ async function onSubmit() {
       personaNombre: personaNombre.value.trim(),
       banco: banco.value,
       tarjeta: tarjeta.value.trim(),
-      cantidadSemanal: cantidadSemanal.value as number,
+      tarifaDiaria: tarifaDiaria.value as number,
     }
     if (props.editingAsignacion) {
       await store.updateAsignacion(props.editingAsignacion.id, payload)
@@ -162,14 +162,14 @@ async function onSubmit() {
             </v-col>
           </v-row>
           <v-text-field
-            v-model.number="cantidadSemanal"
+            v-model.number="tarifaDiaria"
             type="number"
             prefix="$"
-            label="Cantidad semanal (semana completa)"
+            label="Tarifa diaria"
             placeholder="0.00"
             hide-details="auto"
             :error-messages="
-              submitAttempted && !(cantidadSemanal && cantidadSemanal > 0)
+              submitAttempted && !(tarifaDiaria && tarifaDiaria > 0)
                 ? ['Ingresa un importe válido']
                 : []
             "

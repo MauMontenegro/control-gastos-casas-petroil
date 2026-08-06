@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { CreateFundRequestPayload } from '~/types'
+import { useOcrRepository } from '~/repositories/ocrRepository'
 
 interface ConceptRow {
   key: string
@@ -78,6 +79,73 @@ async function addConcept() {
 function removeConcept(key: string) {
   if (concepts.value.length > 1) {
     concepts.value = concepts.value.filter((row) => row.key !== key)
+  }
+}
+
+// El "Tipo de Incremento" se deriva del tipo de gasto: Limpieza siempre se
+// paga en cajero (no hay ventanilla/establecimiento para eso), el resto en
+// establecimiento por default. El usuario puede cambiarlo a mano después.
+function deriveIncrementType(expenseType: string): string {
+  return expenseType === 'Limpieza' ? 'Cajero Automático' : 'Pago en establecimiento'
+}
+
+// En el cajero automático solo se puede retirar en múltiplos de $100 — se
+// redondea siempre hacia arriba (1353 -> 1400) para no quedar corto.
+function applyCajeroRounding(row: ConceptRow) {
+  if (row.incrementType === 'Cajero Automático' && row.amount) {
+    row.amount = Math.ceil(row.amount / 100) * 100
+  }
+}
+
+function onIncrementTypeChange(row: ConceptRow, value: string) {
+  row.incrementType = value
+  applyCajeroRounding(row)
+}
+
+function onExpenseTypeChange(row: ConceptRow, value: string) {
+  row.expenseType = value
+  row.incrementType = deriveIncrementType(value)
+  row.comment = `Pago de ${value}`
+  applyCajeroRounding(row)
+}
+
+function onAmountBlur(row: ConceptRow) {
+  applyCajeroRounding(row)
+}
+
+const ocrProcessingKey = ref<string | null>(null)
+const ocrNotice = reactive<Record<string, string>>({})
+
+async function onDocumentSelected(row: ConceptRow, fileOrFiles: File | File[] | null) {
+  const file = Array.isArray(fileOrFiles) ? (fileOrFiles[0] ?? null) : fileOrFiles
+  row.document = file
+  ocrNotice[row.key] = ''
+  if (!file) return
+
+  ocrProcessingKey.value = row.key
+  try {
+    const result = await useOcrRepository().extractFundRequestDocument(file)
+    if (result.expenseType) row.expenseType = result.expenseType
+    if (result.provider) row.provider = result.provider
+    row.incrementType = deriveIncrementType(row.expenseType)
+    if (result.amount != null) {
+      row.amount = result.amount
+      applyCajeroRounding(row)
+    }
+    if (result.expenseType) row.comment = `Pago de ${result.expenseType}`
+
+    ocrNotice[row.key] =
+      result.expenseType || result.provider || result.amount != null
+        ? 'Datos completados automáticamente — revísalos antes de enviar.'
+        : 'No se pudo leer el documento automáticamente, completa los campos a mano.'
+  } catch (e) {
+    console.error('Error al leer el documento con OCR:', e)
+    const backendMessage = (e as { data?: { message?: string } })?.data?.message
+    ocrNotice[row.key] = backendMessage
+      ? backendMessage
+      : 'No se pudo leer el documento automáticamente, completa los campos a mano.'
+  } finally {
+    ocrProcessingKey.value = null
   }
 }
 
@@ -270,13 +338,14 @@ function handleCancel() {
                   </v-col>
                   <v-col cols="12" sm="4">
                     <v-select
-                      v-model="row.expenseType"
+                      :model-value="row.expenseType"
                       :items="expenseTypeOptions"
                       :menu-props="{ contentClass: 'request-select-menu' }"
                       :label="t('requests.modal.fields.expenseType')"
                       placeholder="Selecciona el tipo de gasto"
                       persistent-placeholder
                       hide-details="auto"
+                      @update:model-value="(v) => onExpenseTypeChange(row, v)"
                     />
                   </v-col>
                   <v-col cols="12" sm="4">
@@ -295,13 +364,14 @@ function handleCancel() {
                 <v-row dense class="concept-fields-row">
                   <v-col cols="12" sm="5">
                     <v-select
-                      v-model="row.incrementType"
+                      :model-value="row.incrementType"
                       :items="incrementTypeOptions"
                       :menu-props="{ contentClass: 'request-select-menu' }"
                       :label="t('requests.modal.fields.incrementType')"
                       placeholder="Selecciona el incremento"
                       persistent-placeholder
                       hide-details="auto"
+                      @update:model-value="(v) => onIncrementTypeChange(row, v)"
                     />
                   </v-col>
                   <v-col cols="12" sm="3">
@@ -313,19 +383,26 @@ function handleCancel() {
                       placeholder="0.00"
                       persistent-placeholder
                       hide-details="auto"
+                      @blur="onAmountBlur(row)"
                     />
                   </v-col>
                   <v-col cols="12" sm="4">
                     <v-file-input
-                      v-model="row.document"
+                      :model-value="row.document"
                       :label="t('requests.modal.fields.document')"
                       placeholder="Adjunta un archivo"
                       persistent-placeholder
                       accept="application/pdf,image/*"
                       prepend-icon=""
                       prepend-inner-icon="mdi-paperclip"
+                      :loading="ocrProcessingKey === row.key"
                       hide-details="auto"
+                      @update:model-value="(file) => onDocumentSelected(row, file)"
                     />
+                    <p v-if="ocrNotice[row.key]" class="ocr-notice">
+                      <v-icon icon="mdi-auto-fix" size="12" />
+                      {{ ocrNotice[row.key] }}
+                    </p>
                   </v-col>
                 </v-row>
 
@@ -596,6 +673,16 @@ function handleCancel() {
 
 .concept-fields-row {
   margin-top: 5px;
+}
+
+.ocr-notice {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 4px 2px 0;
+  color: #0872a5;
+  font-size: 0.65rem;
+  font-weight: 600;
 }
 
 .concept-group-label {

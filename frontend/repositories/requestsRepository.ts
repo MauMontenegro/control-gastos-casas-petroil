@@ -1,4 +1,11 @@
-import type { CreateFundRequestPayload, FundRequest, SippUploadResult } from '~/types'
+import type {
+  CreateFundRequestPayload,
+  FundRequest,
+  FundRequestConceptDetail,
+  FundRequestStatus,
+  SippUploadResult,
+  UpdateFundRequestConceptPayload,
+} from '~/types'
 import { useHttpClient } from '~/repositories/httpClient'
 
 export function useRequestsRepository() {
@@ -11,6 +18,24 @@ export function useRequestsRepository() {
       method: 'POST',
       body: { ids },
     })
+  }
+
+  async function updateStatus(id: string, status: FundRequestStatus): Promise<FundRequest> {
+    return useHttpClient().request<FundRequest>(`/fund-requests/${id}`, {
+      method: 'PATCH',
+      body: { status },
+    })
+  }
+
+  async function updateConcept(
+    requestId: string,
+    conceptId: string,
+    payload: UpdateFundRequestConceptPayload,
+  ): Promise<FundRequestConceptDetail> {
+    return useHttpClient().request<FundRequestConceptDetail>(
+      `/fund-requests/${requestId}/concepts/${conceptId}`,
+      { method: 'PATCH', body: payload },
+    )
   }
 
   async function createRequest(payload: CreateFundRequestPayload): Promise<FundRequest> {
@@ -48,5 +73,5 @@ export function useRequestsRepository() {
     })
   }
 
-  return { getRequests, createRequest, uploadToSipp }
+  return { getRequests, createRequest, uploadToSipp, updateStatus, updateConcept }
 }
