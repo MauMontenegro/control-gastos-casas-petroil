@@ -234,13 +234,13 @@ async function uploadSelectedToSipp() {
 
           <label class="filter-field filter-field--status">
             <span>Estado</span>
-            <v-select v-model="filters.status" :items="quickStatusOptions" item-title="label" item-value="value" aria-label="Estado" density="compact" hide-details />
+            <v-select v-model="filters.status" :items="quickStatusOptions" :menu-props="{ contentClass: 'requests-filter-menu' }" item-title="label" item-value="value" aria-label="Estado" density="compact" hide-details />
           </label>
 
           <label class="filter-field filter-field--date"><span>Desde</span><v-text-field v-model="filters.dateFrom" type="date" aria-label="Desde" density="compact" clearable hide-details /></label>
           <label class="filter-field filter-field--date"><span>Hasta</span><v-text-field v-model="filters.dateTo" type="date" aria-label="Hasta" density="compact" clearable hide-details /></label>
-          <label class="filter-field filter-field--select"><span>Casa Petroil</span><v-select v-model="filters.casa" :items="casaFilterOptions" aria-label="Casa Petroil" density="compact" hide-details /></label>
-          <label class="filter-field filter-field--select"><span>Estado SIPP</span><v-select v-model="filters.sippStatus" :items="sippStatusOptions" aria-label="Estado SIPP" density="compact" hide-details /></label>
+          <label class="filter-field filter-field--select"><span>Casa Petroil</span><v-select v-model="filters.casa" :items="casaFilterOptions" :menu-props="{ contentClass: 'requests-filter-menu' }" aria-label="Casa Petroil" density="compact" hide-details /></label>
+          <label class="filter-field filter-field--select"><span>Estado SIPP</span><v-select v-model="filters.sippStatus" :items="sippStatusOptions" :menu-props="{ contentClass: 'requests-filter-menu' }" aria-label="Estado SIPP" density="compact" hide-details /></label>
           <v-btn v-if="hasActiveFilters" class="clear-filter-button" variant="text" size="small" @click="clearFilters">
             Limpiar
           </v-btn>
@@ -712,5 +712,41 @@ async function uploadSelectedToSipp() {
   .requests-actions { width: 100%; }
   .requests-actions :deep(.v-btn) { flex: 1; }
   .request-metrics { grid-template-columns: 1fr; }
+}
+
+:global(.requests-filter-menu) {
+  overflow: hidden;
+  border: 1px solid #69a9c4;
+  border-radius: 14px !important;
+  background: #c7e4ef !important;
+  box-shadow: 0 14px 28px rgb(7 70 112 / 18%) !important;
+}
+
+:global(.requests-filter-menu .v-list) {
+  padding: 7px;
+  background: #c7e4ef !important;
+}
+
+:global(.requests-filter-menu .v-list-item) {
+  min-height: 40px;
+  margin: 3px 0;
+  border-radius: 9px;
+  color: #17445f;
+  font-size: 0.76rem;
+}
+
+:global(.requests-filter-menu .v-list-item:hover) {
+  background: #a9d5e6 !important;
+}
+
+:global(.requests-filter-menu .v-list-item--active) {
+  background: #82bfd8 !important;
+  color: #075f99 !important;
+  font-weight: 700;
+}
+
+:global(.requests-filter-menu .v-list-item__overlay) {
+  background: transparent !important;
+  opacity: 0 !important;
 }
 </style>

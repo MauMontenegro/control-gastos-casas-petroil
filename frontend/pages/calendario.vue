@@ -343,8 +343,8 @@ async function removeEvent(event: CalendarEvent) {
       </div>
       <div class="d-flex ga-2">
         <v-btn
-          color="secondary"
-          variant="outlined"
+          class="new-reminder-button"
+          variant="flat"
           prepend-icon="mdi-bell-plus-outline"
           @click="openNewEvent"
         >
@@ -404,6 +404,7 @@ async function removeEvent(event: CalendarEvent) {
           <v-select
             v-model="serviceFilter"
             :items="serviceOptions"
+            :menu-props="{ contentClass: 'calendar-filter-menu' }"
             label="Servicio"
             density="compact"
             variant="outlined"
@@ -412,6 +413,7 @@ async function removeEvent(event: CalendarEvent) {
           <v-select
             v-model="branchFilter"
             :items="branchOptions"
+            :menu-props="{ contentClass: 'calendar-filter-menu' }"
             label="Sucursal"
             density="compact"
             variant="outlined"
@@ -1572,5 +1574,63 @@ async function removeEvent(event: CalendarEvent) {
     max-height: 420px;
     border-top: 1px solid var(--calendar-border);
   }
+}
+:global(.calendar-filter-menu) {
+  overflow: hidden;
+  border: 1px solid #8fc5d9;
+  border-radius: 14px !important;
+  background: #edf7fa !important;
+  box-shadow: 0 14px 30px rgb(7 70 112 / 18%) !important;
+}
+
+.new-reminder-button {
+  min-height: 42px;
+  padding-inline: 18px !important;
+  border: 1px solid #064f80;
+  border-radius: 11px !important;
+  background: #075f99 !important;
+  box-shadow: 0 8px 18px rgb(7 71 112 / 25%);
+  color: #fff !important;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  transition: transform 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.new-reminder-button:hover {
+  background: #064f80 !important;
+  box-shadow: 0 11px 23px rgb(7 71 112 / 32%);
+  transform: translateY(-1px);
+}
+
+.new-reminder-button :deep(.v-icon) {
+  color: #fff !important;
+}
+
+:global(.calendar-filter-menu .v-list) {
+  padding: 7px;
+  background: #edf7fa !important;
+}
+
+:global(.calendar-filter-menu .v-list-item) {
+  min-height: 40px;
+  margin: 3px 0;
+  border-radius: 9px;
+  color: #17445f;
+  font-size: 0.76rem;
+}
+
+:global(.calendar-filter-menu .v-list-item:hover) {
+  background: #d8edf5 !important;
+}
+
+:global(.calendar-filter-menu .v-list-item--active) {
+  background: #c2e2ef !important;
+  color: #075f99 !important;
+  font-weight: 700;
+}
+
+:global(.calendar-filter-menu .v-list-item__overlay) {
+  background: transparent !important;
+  opacity: 0 !important;
 }
 </style>
