@@ -609,7 +609,8 @@ async function removeEvent(event: CalendarEvent) {
             <div
               v-for="item in selectedDay.eventBatch"
               :key="`event-batch-${item.event.id}`"
-              class="payment-row"
+              class="payment-row reminder-row"
+              :class="{ 'reminder-row--highlighted': highlightedEventId === item.event.id }"
             >
               <div class="payment-icon reminder-icon">
                 <v-icon icon="mdi-bell-check-outline" size="18" />

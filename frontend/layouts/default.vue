@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { useAuth0 } from '@auth0/auth0-vue'
-import { calendarDateKey, calendarEventOccursOn } from '~/utils/calendarEventDates'
+import {
+  calendarDateKey,
+  calendarEventOccursOn,
+  eventOccurrenceForPaymentFriday,
+} from '~/utils/calendarEventDates'
 
 const auth0 = useAuth0()
 const user = computed(() => auth0?.user.value)
@@ -17,7 +21,30 @@ const todayKey = computed(() => calendarDateKey(today.value))
 const todayReminders = computed(() =>
   calendarEvents.items.filter((event) => calendarEventOccursOn(event, today.value)),
 )
-const pendingCount = computed(() => pendingPaymentsCount.value + todayReminders.value.length)
+const todayReminderIds = computed(() => new Set(todayReminders.value.map((event) => event.id)))
+const fridayPaymentReminders = computed(() => {
+  if (today.value.getDay() !== 5) return []
+
+  return calendarEvents.items.flatMap((event) => {
+    if (todayReminderIds.value.has(event.id)) return []
+    const dueDate = eventOccurrenceForPaymentFriday(event, today.value)
+    return dueDate ? [{ event, dueDate }] : []
+  })
+})
+const pendingReminderCount = computed(
+  () => todayReminders.value.length + fridayPaymentReminders.value.length,
+)
+const pendingCount = computed(() => pendingPaymentsCount.value + pendingReminderCount.value)
+
+function formatPendingDate(date: Date): string {
+  return new Intl.DateTimeFormat('es-MX', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  })
+    .format(date)
+    .replace('.', '')
+}
 
 const navItems = [
   { key: 'solicitudes', to: '/solicitudes', icon: 'mdi-file-document-outline' },
@@ -81,7 +108,7 @@ function handleLogout() {
           <div class="pending-popover__heading">
             <span>Pendientes de hoy</span>
             <strong>
-              {{ pendingPaymentsCount }} pagos y {{ todayReminders.length }} recordatorios
+              {{ pendingPaymentsCount }} pagos y {{ pendingReminderCount }} recordatorios
             </strong>
           </div>
           <button
@@ -93,6 +120,7 @@ function handleLogout() {
             ×
           </button>
           <div v-if="todayReminders.length" class="pending-reminders">
+            <span class="pending-reminders__title">Vencen hoy</span>
             <NuxtLink
               v-for="event in todayReminders"
               :key="event.id"
@@ -102,7 +130,32 @@ function handleLogout() {
               <v-icon icon="mdi-bell-ring-outline" size="17" />
               <span>
                 <strong>{{ event.tipoPago }} · {{ event.casaNombre }}</strong>
-                <small>{{ event.nota || 'Recordatorio programado para hoy' }}</small>
+                <small>Vence hoy · {{ event.nota || 'Atender en su fecha programada' }}</small>
+              </span>
+              <v-icon icon="mdi-chevron-right" size="17" />
+            </NuxtLink>
+          </div>
+          <div
+            v-if="fridayPaymentReminders.length"
+            class="pending-reminders pending-reminders--payment"
+          >
+            <span class="pending-reminders__title">Programados para pagar hoy</span>
+            <NuxtLink
+              v-for="item in fridayPaymentReminders"
+              :key="`friday-${item.event.id}`"
+              :to="{
+                path: '/calendario',
+                query: { fecha: todayKey, recordatorio: item.event.id },
+              }"
+              @click="pendingOpen = false"
+            >
+              <v-icon icon="mdi-wallet-outline" size="17" />
+              <span>
+                <strong>{{ item.event.tipoPago }} · {{ item.event.casaNombre }}</strong>
+                <small>
+                  Pagar hoy · vence {{ formatPendingDate(item.dueDate) }}
+                  <template v-if="item.event.nota"> · {{ item.event.nota }}</template>
+                </small>
               </span>
               <v-icon icon="mdi-chevron-right" size="17" />
             </NuxtLink>
@@ -110,7 +163,7 @@ function handleLogout() {
           <div class="pending-popover__actions">
             <NuxtLink to="/pagos" @click="pendingOpen = false">Revisar pagos</NuxtLink>
             <NuxtLink
-              v-if="todayReminders.length"
+              v-if="pendingReminderCount"
               :to="{ path: '/calendario', query: { fecha: todayKey } }"
               @click="pendingOpen = false"
             >
@@ -429,6 +482,14 @@ function handleLogout() {
   gap: 6px;
 }
 
+.pending-reminders__title {
+  color: #6e8494;
+  font-size: 0.61rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .pending-reminders > a {
   display: grid;
   grid-template-columns: 24px minmax(0, 1fr) 18px;
@@ -445,6 +506,20 @@ function handleLogout() {
 .pending-reminders > a:hover {
   border-color: #f27a1a;
   background: #fff2e8;
+}
+
+.pending-reminders--payment > a {
+  border-color: #f0d38c;
+  background: #fff9e9;
+}
+
+.pending-reminders--payment > a:hover {
+  border-color: #e2aa24;
+  background: #fff4cf;
+}
+
+.pending-reminders--payment > a > :deep(.v-icon:first-child) {
+  color: #b9790c;
 }
 
 .pending-reminders > a > span {
