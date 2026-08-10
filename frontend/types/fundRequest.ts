@@ -4,6 +4,12 @@ export type SippStatus = 'no-enviada' | 'en-proceso' | 'enviada' | 'error'
 
 export type ComprobacionStatus = 'pendiente' | 'enviada' | 'autorizada' | 'rechazada'
 
+export type TipoNegocio =
+  | 'Distribuidora'
+  | 'Negocios Asociados'
+  | 'Distribuidora y Negocios Asociados'
+  | 'COPE'
+
 export interface FundRequestConceptDetail {
   id: string
   expenseType: string
@@ -18,6 +24,7 @@ export interface FundRequestConceptDetail {
   grupoCentroCosto?: string
   centroCosto?: string
   deducible?: 'SI' | 'NO'
+  tipoNegocio?: TipoNegocio
   comprobacionStatus?: ComprobacionStatus
 }
 
@@ -26,6 +33,7 @@ export interface UpdateFundRequestConceptPayload {
   grupoCentroCosto?: string
   centroCosto?: string
   deducible?: 'SI' | 'NO'
+  tipoNegocio?: TipoNegocio
   comprobacionStatus?: ComprobacionStatus
 }
 

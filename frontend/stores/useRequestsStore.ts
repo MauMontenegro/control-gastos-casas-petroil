@@ -67,6 +67,16 @@ export const useRequestsStore = defineStore('requests', () => {
     return updated
   }
 
+  async function sendConceptToSipp(requestId: string, conceptId: string) {
+    const updated = await useRequestsRepository().sendConceptToSipp(requestId, conceptId)
+    const request = items.value.find((r) => r.id === requestId)
+    if (request) {
+      const index = request.concepts.findIndex((c) => c.id === conceptId)
+      if (index !== -1) request.concepts[index] = updated
+    }
+    return updated
+  }
+
   return {
     items,
     loading,
@@ -79,5 +89,6 @@ export const useRequestsStore = defineStore('requests', () => {
     uploadToSipp,
     updateStatus,
     updateConcept,
+    sendConceptToSipp,
   }
 })

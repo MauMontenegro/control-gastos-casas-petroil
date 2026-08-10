@@ -38,6 +38,20 @@ export function useRequestsRepository() {
     )
   }
 
+  // Dispara el RPA que captura este concepto en SIPP. Sin body: toda la
+  // info que necesita el RPA (casa, importe, proveedor, tipo de gasto,
+  // documento) ya vive en el concepto. El backend regresa el concepto con
+  // comprobacionStatus en 'enviada' una vez capturado.
+  async function sendConceptToSipp(
+    requestId: string,
+    conceptId: string,
+  ): Promise<FundRequestConceptDetail> {
+    return useHttpClient().request<FundRequestConceptDetail>(
+      `/fund-requests/${requestId}/concepts/${conceptId}/sipp-comprobacion`,
+      { method: 'POST' },
+    )
+  }
+
   async function createRequest(payload: CreateFundRequestPayload): Promise<FundRequest> {
     const body = new FormData()
     body.append('requiredDate', payload.requiredDate)
@@ -73,5 +87,12 @@ export function useRequestsRepository() {
     })
   }
 
-  return { getRequests, createRequest, uploadToSipp, updateStatus, updateConcept }
+  return {
+    getRequests,
+    createRequest,
+    uploadToSipp,
+    updateStatus,
+    updateConcept,
+    sendConceptToSipp,
+  }
 }

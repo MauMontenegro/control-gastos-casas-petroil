@@ -3,9 +3,9 @@ import type {
   ComprobacionStatus,
   FundRequest,
   FundRequestConceptDetail,
+  TipoNegocio,
   UpdateFundRequestConceptPayload,
 } from '~/types'
-import { useRpaRepository } from '~/repositories/rpaRepository'
 
 interface ComprobacionEntry {
   request: FundRequest
@@ -20,7 +20,14 @@ const config = useRuntimeConfig()
 // Mismo catálogo usado al capturar la solicitud (RequestFormDialog.vue). El
 // diccionario concepto -> catálogo real de SIPP para un servicio específico
 // llega después; por ahora el usuario puede corregirlo aquí a mano.
-const expenseTypeOptions = ['Luz', 'Agua', 'Limpieza', 'Gas', 'Internet', 'Otros']
+const expenseTypeOptions = ['Luz', 'Agua', 'Limpieza', 'Gas', 'Internet']
+
+const tipoNegocioOptions: TipoNegocio[] = [
+  'Distribuidora',
+  'Negocios Asociados',
+  'Distribuidora y Negocios Asociados',
+  'COPE',
+]
 
 const comprobacionStatusOptions: { title: string; value: ComprobacionStatus }[] = [
   { title: 'Pendiente', value: 'pendiente' },
@@ -110,35 +117,8 @@ const groupedEntries = computed(() => {
     const key = `${entry.empresa} · ${entry.concept.casa}`
     groups.set(key, [...(groups.get(key) ?? []), entry])
   }
-  return [...groups.entries()].map(([group, items]) => ({
-    group,
-    items,
-    casaId: casasStore.items.find((c) => c.nombre === items[0].concept.casa)?.id ?? null,
-  }))
+  return [...groups.entries()].map(([group, items]) => ({ group, items }))
 })
-
-const rpaRunningGroup = ref<string | null>(null)
-const rpaNotice = reactive<Record<string, string>>({})
-
-async function runSucursalRpa(group: { group: string; casaId: number | null }) {
-  if (!group.casaId) {
-    rpaNotice[group.group] = 'No se encontró la sucursal para ejecutar el RPA.'
-    return
-  }
-  rpaRunningGroup.value = group.group
-  rpaNotice[group.group] = ''
-  try {
-    const result = await useRpaRepository().executeSucursalComprobacion(group.casaId)
-    rpaNotice[group.group] = result.message || 'RPA ejecutado correctamente.'
-  } catch (e) {
-    console.error('Error al ejecutar el RPA de la sucursal:', e)
-    const fetchError = e as { data?: { message?: string }; message?: string }
-    rpaNotice[group.group] =
-      fetchError.data?.message || fetchError.message || 'No se pudo ejecutar el RPA.'
-  } finally {
-    rpaRunningGroup.value = null
-  }
-}
 
 const savingId = ref<string | null>(null)
 const saveError = ref<string | null>(null)
@@ -155,6 +135,25 @@ async function saveConcept(entry: ComprobacionEntry, payload: UpdateFundRequestC
       fetchError.data?.message || fetchError.message || 'No se pudo guardar el cambio.'
   } finally {
     savingId.value = null
+  }
+}
+
+const sippRunningId = ref<string | null>(null)
+const sippNotice = reactive<Record<string, string>>({})
+
+async function sendToSipp(entry: ComprobacionEntry) {
+  sippRunningId.value = entry.concept.id
+  sippNotice[entry.concept.id] = ''
+  try {
+    await requestsStore.sendConceptToSipp(entry.request.id, entry.concept.id)
+    sippNotice[entry.concept.id] = 'Enviado a SIPP correctamente.'
+  } catch (e) {
+    console.error('Error al enviar el concepto a SIPP:', e)
+    const fetchError = e as { data?: { message?: string }; message?: string }
+    sippNotice[entry.concept.id] =
+      fetchError.data?.message || fetchError.message || 'No se pudo enviar a SIPP.'
+  } finally {
+    sippRunningId.value = null
   }
 }
 </script>
@@ -272,22 +271,7 @@ async function saveConcept(entry: ComprobacionEntry, payload: UpdateFundRequestC
 
     <div v-else>
       <div v-for="group in groupedEntries" :key="group.group" class="comprobacion-group">
-        <div class="comprobacion-group__header">
-          <p class="comprobacion-group__label"><i />{{ group.group }}</p>
-          <v-btn
-            size="small"
-            variant="tonal"
-            color="primary"
-            prepend-icon="mdi-robot-outline"
-            :loading="rpaRunningGroup === group.group"
-            @click="runSucursalRpa(group)"
-          >
-            Ejecutar RPA
-          </v-btn>
-        </div>
-        <p v-if="rpaNotice[group.group]" class="comprobacion-group__rpa-notice">
-          {{ rpaNotice[group.group] }}
-        </p>
+        <p class="comprobacion-group__label"><i />{{ group.group }}</p>
 
         <article
           v-for="entry in group.items"
@@ -309,10 +293,25 @@ async function saveConcept(entry: ComprobacionEntry, payload: UpdateFundRequestC
                 )?.title
               }}
             </v-chip>
+            <v-btn
+              size="small"
+              variant="tonal"
+              color="primary"
+              class="comprobacion-card__sipp-button"
+              prepend-icon="mdi-robot-outline"
+              :disabled="(entry.concept.comprobacionStatus ?? 'pendiente') !== 'pendiente'"
+              :loading="sippRunningId === entry.concept.id"
+              @click="sendToSipp(entry)"
+            >
+              Enviar a SIPP
+            </v-btn>
           </div>
+          <p v-if="sippNotice[entry.concept.id]" class="comprobacion-card__sipp-notice">
+            {{ sippNotice[entry.concept.id] }}
+          </p>
 
           <v-row dense class="comprobacion-card__fields">
-            <v-col cols="12" sm="6">
+            <v-col cols="12" sm="3">
               <v-select
                 :model-value="entry.concept.expenseType"
                 :items="expenseTypeOptions"
@@ -345,6 +344,21 @@ async function saveConcept(entry: ComprobacionEntry, payload: UpdateFundRequestC
                 persistent-placeholder
                 hide-details="auto"
                 @blur="saveConcept(entry, { centroCosto: entry.concept.centroCosto })"
+              />
+            </v-col>
+            <v-col cols="12" sm="3">
+              <v-select
+                :model-value="entry.concept.tipoNegocio"
+                :items="tipoNegocioOptions"
+                :loading="savingId === entry.concept.id"
+                label="Tipo de Negocio"
+                hide-details="auto"
+                @update:model-value="
+                  (v) => {
+                    entry.concept.tipoNegocio = v
+                    saveConcept(entry, { tipoNegocio: v })
+                  }
+                "
               />
             </v-col>
           </v-row>
@@ -615,21 +629,12 @@ async function saveConcept(entry: ComprobacionEntry, payload: UpdateFundRequestC
   margin-bottom: 22px;
 }
 
-.comprobacion-group__header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0 0 10px;
-}
-
 .comprobacion-group__label {
   display: flex;
-  flex: 1;
-  min-width: 0;
   align-items: center;
   gap: 8px;
   padding: 9px 14px;
-  margin: 0;
+  margin: 0 0 10px;
   border: 1px solid #c5dfe9;
   border-radius: 10px;
   background: #fff;
@@ -639,13 +644,6 @@ async function saveConcept(entry: ComprobacionEntry, payload: UpdateFundRequestC
   font-weight: 800;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-}
-
-.comprobacion-group__rpa-notice {
-  margin: -4px 0 10px;
-  color: #0872a5;
-  font-size: 0.72rem;
-  font-weight: 600;
 }
 
 .comprobacion-group__label i {
@@ -688,6 +686,17 @@ async function saveConcept(entry: ComprobacionEntry, payload: UpdateFundRequestC
   color: #0877a8;
   font-size: 0.68rem;
   font-weight: 700;
+}
+
+.comprobacion-card__sipp-button {
+  margin-left: auto;
+}
+
+.comprobacion-card__sipp-notice {
+  margin: -8px 0 14px;
+  color: #0872a5;
+  font-size: 0.72rem;
+  font-weight: 600;
 }
 
 .comprobacion-card__fields :deep(.v-field) {

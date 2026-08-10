@@ -36,7 +36,7 @@ const store = useRequestsStore()
 const casasStore = useCasasStore()
 const { t } = useI18n()
 
-const expenseTypeOptions = ['Luz', 'Agua', 'Limpieza', 'Gas', 'Internet', 'Otros']
+const expenseTypeOptions = ['Luz', 'Agua', 'Limpieza', 'Gas', 'Internet']
 const incrementTypeOptions = ['Ventanilla Bancaria', 'Cajero Automático', 'Pago en establecimiento']
 const providerOptions = [
   'CFE',
