@@ -164,7 +164,8 @@ async function onSubmit() {
               type="date"
               aria-label="Fecha"
               density="compact"
-              hide-details="auto"
+              hint="Se respetará esta fecha y también se preparará en el viernes anterior."
+              persistent-hint
               :error-messages="submitAttempted && !fecha ? ['Selecciona una fecha'] : []"
             />
             <v-text-field
@@ -176,7 +177,8 @@ async function onSubmit() {
               aria-label="Día del mes"
               placeholder="Ej. 15"
               density="compact"
-              hide-details="auto"
+              hint="Cada ocurrencia conservará su día y se preparará en el viernes anterior."
+              persistent-hint
               :error-messages="submitAttempted && !diaDelMes ? ['Indica el día del mes (1-31)'] : []"
             />
           </label>
