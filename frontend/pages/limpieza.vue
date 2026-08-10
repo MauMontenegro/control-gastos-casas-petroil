@@ -17,14 +17,11 @@ const diasSemana: { key: keyof LimpiezaDias; label: string }[] = [
   { key: 'domingo', label: 'Dom' },
 ]
 
-// La "cantidad semanal" es el importe de una semana completa trabajada;
-// el monto real se prorratea por los días que sí se marcaron. Si el
-// criterio real del negocio no es /7, hay que ajustar esta fórmula.
 function diasTrabajados(asignacion: LimpiezaAsignacion): number {
   return diasSemana.filter((d) => asignacion.dias[d.key]).length
 }
 function montoAPagar(asignacion: LimpiezaAsignacion): number {
-  return Math.round((asignacion.cantidadSemanal / 7) * diasTrabajados(asignacion))
+  return asignacion.tarifaDiaria * diasTrabajados(asignacion)
 }
 
 const groupedAsignaciones = computed(() => {

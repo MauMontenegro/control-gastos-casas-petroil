@@ -2,6 +2,8 @@ export type FundRequestStatus = 'en-revision' | 'autorizada' | 'correccion'
 
 export type SippStatus = 'no-enviada' | 'en-proceso' | 'enviada' | 'error'
 
+export type ComprobacionStatus = 'pendiente' | 'enviada' | 'autorizada' | 'rechazada'
+
 export interface FundRequestConceptDetail {
   id: string
   expenseType: string
@@ -12,6 +14,19 @@ export interface FundRequestConceptDetail {
   comment?: string
   documentName: string
   documentUrl: string
+  /** Campos de comprobación — solo tienen valor una vez que la solicitud está autorizada. */
+  grupoCentroCosto?: string
+  centroCosto?: string
+  deducible?: 'SI' | 'NO'
+  comprobacionStatus?: ComprobacionStatus
+}
+
+export interface UpdateFundRequestConceptPayload {
+  expenseType?: string
+  grupoCentroCosto?: string
+  centroCosto?: string
+  deducible?: 'SI' | 'NO'
+  comprobacionStatus?: ComprobacionStatus
 }
 
 export interface FundRequest {

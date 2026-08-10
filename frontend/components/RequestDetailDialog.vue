@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import type { FundRequest } from '~/types'
+import type { FundRequest, FundRequestStatus } from '~/types'
 
 const props = defineProps<{ request: FundRequest | null }>()
 const open = defineModel<boolean>({ default: false })
 
 const config = useRuntimeConfig()
+const store = useRequestsStore()
 
 function documentHref(documentUrl: string): string {
   // apiBaseUrl ya incluye "/api" (ej. http://localhost:4000/api). El backend
@@ -25,6 +26,36 @@ const headers = [
   { title: 'Motivo', key: 'comment' },
   { title: 'Documento', key: 'documentUrl', sortable: false },
 ]
+
+const statusOptions: { title: string; value: FundRequestStatus }[] = [
+  { title: 'En revisión', value: 'en-revision' },
+  { title: 'Autorizada', value: 'autorizada' },
+  { title: 'Corrección', value: 'correccion' },
+]
+const statusColor: Record<FundRequestStatus, string> = {
+  'en-revision': 'info',
+  autorizada: 'success',
+  correccion: 'error',
+}
+
+const updatingStatus = ref(false)
+const statusError = ref<string | null>(null)
+
+async function changeStatus(status: FundRequestStatus) {
+  if (!props.request || status === props.request.status) return
+  updatingStatus.value = true
+  statusError.value = null
+  try {
+    await store.updateStatus(props.request.id, status)
+  } catch (e) {
+    console.error('Error al cambiar el estatus de la solicitud:', e)
+    const fetchError = e as { data?: { message?: string }; message?: string }
+    statusError.value =
+      fetchError.data?.message || fetchError.message || 'No se pudo cambiar el estatus.'
+  } finally {
+    updatingStatus.value = false
+  }
+}
 </script>
 
 <template>
@@ -43,6 +74,29 @@ const headers = [
           </div>
           <v-btn icon="mdi-close" variant="text" density="comfortable" @click="open = false" />
         </div>
+
+        <div class="d-flex align-center ga-2 mt-4">
+          <span class="text-caption font-weight-bold text-uppercase text-medium-emphasis">
+            Estatus:
+          </span>
+          <v-select
+            :model-value="props.request.status"
+            :items="statusOptions"
+            :loading="updatingStatus"
+            density="compact"
+            variant="outlined"
+            hide-details
+            style="max-width: 220px"
+            @update:model-value="changeStatus"
+          >
+            <template #selection="{ item }">
+              <v-chip size="small" :color="statusColor[item.value as FundRequestStatus]" variant="tonal">
+                {{ item.title }}
+              </v-chip>
+            </template>
+          </v-select>
+        </div>
+        <p v-if="statusError" class="text-caption text-error mt-1 mb-0">{{ statusError }}</p>
       </v-card-item>
 
       <v-divider />

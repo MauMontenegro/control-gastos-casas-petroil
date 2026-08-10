@@ -48,7 +48,7 @@ function formatPendingDate(date: Date): string {
 
 const navItems = [
   { key: 'solicitudes', to: '/solicitudes', icon: 'mdi-file-document-outline' },
-  { key: 'pagos', to: '/pagos', icon: 'mdi-clipboard-text-outline' },
+  { key: 'comprobaciones', to: '/comprobaciones', icon: 'mdi-clipboard-text-outline' },
   { key: 'calendario', to: '/calendario', icon: 'mdi-calendar-month-outline' },
   { key: 'limpieza', to: '/limpieza', icon: 'mdi-broom' },
   { key: 'reportes', to: '/', icon: 'mdi-chart-bar' },

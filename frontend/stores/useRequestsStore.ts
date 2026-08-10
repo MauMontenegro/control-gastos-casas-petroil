@@ -1,5 +1,11 @@
 import { useRequestsRepository } from '~/repositories/requestsRepository'
-import type { CreateFundRequestPayload, FundRequest, SippUploadResult } from '~/types'
+import type {
+  CreateFundRequestPayload,
+  FundRequest,
+  FundRequestStatus,
+  SippUploadResult,
+  UpdateFundRequestConceptPayload,
+} from '~/types'
 
 export const useRequestsStore = defineStore('requests', () => {
   const items = ref<FundRequest[]>([])
@@ -40,6 +46,27 @@ export const useRequestsStore = defineStore('requests', () => {
     return results
   }
 
+  async function updateStatus(id: string, status: FundRequestStatus) {
+    const updated = await useRequestsRepository().updateStatus(id, status)
+    const index = items.value.findIndex((r) => r.id === id)
+    if (index !== -1) items.value[index] = updated
+    return updated
+  }
+
+  async function updateConcept(
+    requestId: string,
+    conceptId: string,
+    payload: UpdateFundRequestConceptPayload,
+  ) {
+    const updated = await useRequestsRepository().updateConcept(requestId, conceptId, payload)
+    const request = items.value.find((r) => r.id === requestId)
+    if (request) {
+      const index = request.concepts.findIndex((c) => c.id === conceptId)
+      if (index !== -1) request.concepts[index] = updated
+    }
+    return updated
+  }
+
   return {
     items,
     loading,
@@ -50,5 +77,7 @@ export const useRequestsStore = defineStore('requests', () => {
     fetchRequests,
     createRequest,
     uploadToSipp,
+    updateStatus,
+    updateConcept,
   }
 })
