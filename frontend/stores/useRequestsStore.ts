@@ -1,7 +1,9 @@
 import { useRequestsRepository } from '~/repositories/requestsRepository'
 import type {
+  CreateFundRequestConceptItem,
   CreateFundRequestPayload,
   FundRequest,
+  FundRequestConceptDetail,
   FundRequestStatus,
   SippUploadResult,
   UpdateFundRequestConceptPayload,
@@ -15,6 +17,18 @@ export const useRequestsStore = defineStore('requests', () => {
   const pending = computed(() => items.value.filter((r) => r.status === 'en-revision'))
   const approved = computed(() => items.value.filter((r) => r.status === 'autorizada'))
   const rejected = computed(() => items.value.filter((r) => r.status === 'correccion'))
+
+  function mergeConcept(requestId: string, conceptId: string, updated: FundRequestConceptDetail) {
+    const request = items.value.find((r) => r.id === requestId)
+    if (!request) return
+    const index = request.concepts.findIndex((c) => c.id === conceptId)
+    if (index === -1) return
+    request.concepts[index] = updated
+    // El PATCH de un concepto solo regresa ese concepto, no la solicitud
+    // completa — hay que recalcular el total local para que la tabla y el
+    // detalle reflejen el importe nuevo sin esperar a un refetch.
+    request.total = request.concepts.reduce((sum, c) => sum + c.amount, 0)
+  }
 
   async function fetchRequests() {
     loading.value = true
@@ -53,27 +67,39 @@ export const useRequestsStore = defineStore('requests', () => {
     return updated
   }
 
+  async function updateCard(id: string, card: string) {
+    const updated = await useRequestsRepository().updateCard(id, card)
+    const index = items.value.findIndex((r) => r.id === id)
+    if (index !== -1) items.value[index] = updated
+    return updated
+  }
+
   async function updateConcept(
     requestId: string,
     conceptId: string,
     payload: UpdateFundRequestConceptPayload,
   ) {
     const updated = await useRequestsRepository().updateConcept(requestId, conceptId, payload)
-    const request = items.value.find((r) => r.id === requestId)
-    if (request) {
-      const index = request.concepts.findIndex((c) => c.id === conceptId)
-      if (index !== -1) request.concepts[index] = updated
-    }
+    mergeConcept(requestId, conceptId, updated)
+    return updated
+  }
+
+  async function addConcepts(requestId: string, concepts: CreateFundRequestConceptItem[]) {
+    const result = await useRequestsRepository().addConcepts(requestId, concepts)
+    const index = items.value.findIndex((r) => r.id === requestId)
+    if (index !== -1) items.value[index] = result.request
+    return result
+  }
+
+  async function uploadConceptDocument(requestId: string, conceptId: string, file: File) {
+    const updated = await useRequestsRepository().uploadConceptDocument(requestId, conceptId, file)
+    mergeConcept(requestId, conceptId, updated)
     return updated
   }
 
   async function sendConceptToSipp(requestId: string, conceptId: string) {
     const updated = await useRequestsRepository().sendConceptToSipp(requestId, conceptId)
-    const request = items.value.find((r) => r.id === requestId)
-    if (request) {
-      const index = request.concepts.findIndex((c) => c.id === conceptId)
-      if (index !== -1) request.concepts[index] = updated
-    }
+    mergeConcept(requestId, conceptId, updated)
     return updated
   }
 
@@ -86,9 +112,12 @@ export const useRequestsStore = defineStore('requests', () => {
     rejected,
     fetchRequests,
     createRequest,
+    addConcepts,
     uploadToSipp,
     updateStatus,
+    updateCard,
     updateConcept,
+    uploadConceptDocument,
     sendConceptToSipp,
   }
 })

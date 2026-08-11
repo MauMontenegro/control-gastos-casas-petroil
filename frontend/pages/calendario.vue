@@ -1,8 +1,16 @@
 <script setup lang="ts">
-import type { CalendarEvent, Payment, PaymentStatus } from '~/types'
+import type {
+  CalendarEvent,
+  CalendarEventPrepareContext,
+  CreateFundRequestConceptItem,
+  FundRequestConceptDetail,
+  Payment,
+  PaymentStatus,
+} from '~/types'
 import {
   calendarDateKey,
   calendarEventOccursOn,
+  calendarEventPeriodKey,
   eventOccurrenceForPaymentFriday,
   parseCalendarDate,
   previousOrSameFriday,
@@ -17,12 +25,122 @@ interface CalendarDay {
   payments: Payment[]
   paymentBatch: Payment[]
   events: CalendarEvent[]
+  pendingEventsCount: number
   eventBatch: Array<{ event: CalendarEvent; dueDate: Date }>
 }
 
 const store = usePaymentsStore()
 const eventsStore = useCalendarEventsStore()
+const requestsStore = useRequestsStore()
 const route = useRoute()
+
+// Una ocurrencia (fecha, o mes si es mensual) deja de alertar cuando su
+// concepto asociado ya se envió a SIPP — ver preparationFor/isEventPaid.
+function preparationFor(event: CalendarEvent, date: Date) {
+  const periodKey = calendarEventPeriodKey(event, date)
+  return event.preparations?.find((p) => p.periodKey === periodKey) ?? null
+}
+
+function isEventPaid(event: CalendarEvent, date: Date): boolean {
+  return preparationFor(event, date)?.comprobacionStatus === 'enviada'
+}
+
+const showPrepareDialog = ref(false)
+const preparePrefill = ref<CalendarEventPrepareContext | null>(null)
+
+function openPrepare(event: CalendarEvent, date: Date) {
+  preparePrefill.value = {
+    casa: event.casa,
+    expenseType: event.tipoPago,
+    tarjeta: event.tarjeta,
+    calendarEventId: event.id,
+    periodKey: calendarEventPeriodKey(event, date),
+  }
+  showPrepareDialog.value = true
+}
+
+// Botón "Crear Solicitudes": arma en automático (sin abrir el diálogo) un
+// concepto por cada recordatorio sin preparar del viernes seleccionado,
+// agrupados por tarjeta — una solicitud (o una ya abierta) por tarjeta.
+// Proveedor/importe/documento quedan vacíos, se completan después en
+// Solicitudes.
+const bulkPreparing = ref(false)
+const bulkPrepareError = ref<string | null>(null)
+const bulkPrepareNotice = ref<string | null>(null)
+
+const pendingBatchItems = computed(() =>
+  selectedDay.value.eventBatch.filter((item) => !preparationFor(item.event, item.dueDate)),
+)
+
+async function createSolicitudesForBatch() {
+  const items = pendingBatchItems.value
+  if (!items.length) return
+
+  bulkPreparing.value = true
+  bulkPrepareError.value = null
+  bulkPrepareNotice.value = null
+  try {
+    await requestsStore.fetchRequests()
+
+    const groups = new Map<string, typeof items>()
+    for (const item of items) {
+      groups.set(item.event.tarjeta, [...(groups.get(item.event.tarjeta) ?? []), item])
+    }
+
+    let requestCount = 0
+    for (const [tarjeta, groupItems] of groups) {
+      const conceptItems: CreateFundRequestConceptItem[] = groupItems.map((item) => ({
+        expenseType: item.event.tipoPago,
+        incrementType: item.event.tipoPago === 'Limpieza' ? 'Cajero Automático' : 'Pago en establecimiento',
+        casa: item.event.casa,
+        provider: '',
+        amount: 0,
+        document: null,
+        comment: `Pago de ${item.event.tipoPago}`,
+      }))
+
+      const existing = requestsStore.items.find(
+        (r) => r.status === 'en-revision' && r.card === tarjeta,
+      )
+
+      let requestId: string
+      let addedConcepts: FundRequestConceptDetail[]
+      if (existing) {
+        const result = await requestsStore.addConcepts(existing.id, conceptItems)
+        requestId = existing.id
+        addedConcepts = result.addedConcepts
+      } else {
+        const created = await requestsStore.createRequest({
+          requiredDate: dateKey(new Date()),
+          card: tarjeta,
+          concepts: conceptItems,
+        })
+        requestId = created.id
+        addedConcepts = created.concepts
+      }
+
+      for (const [index, item] of groupItems.entries()) {
+        const concept = addedConcepts[index]
+        if (!concept) continue
+        await eventsStore.linkPreparation(item.event.id, {
+          periodKey: calendarEventPeriodKey(item.event, item.dueDate),
+          requestId,
+          conceptId: concept.id,
+        })
+      }
+      requestCount += 1
+    }
+
+    bulkPrepareNotice.value = `Se prepararon ${items.length} concepto${items.length === 1 ? '' : 's'} en ${requestCount} solicitud${requestCount === 1 ? '' : 'es'}. Completa proveedor, importe y documento en Solicitudes.`
+  } catch (e) {
+    console.error('Error al crear solicitudes en lote:', e)
+    const fetchError = e as { data?: { message?: string }; message?: string }
+    bulkPrepareError.value =
+      fetchError.data?.message || fetchError.message || 'No se pudieron crear las solicitudes.'
+  } finally {
+    bulkPreparing.value = false
+  }
+}
 
 const monthNames = [
   'enero',
@@ -210,6 +328,7 @@ const calendarDays = computed<CalendarDay[]>(() => {
     const date = new Date(gridStart)
     date.setDate(gridStart.getDate() + index)
     const key = dateKey(date)
+    const events = eventsForDay(date)
 
     return {
       date,
@@ -219,7 +338,8 @@ const calendarDays = computed<CalendarDay[]>(() => {
       isFriday: date.getDay() === 5,
       payments: paymentsByDueDate.value.get(key) ?? [],
       paymentBatch: batchesByFriday.value.get(key) ?? [],
-      events: eventsForDay(date),
+      events,
+      pendingEventsCount: events.filter((event) => !isEventPaid(event, date)).length,
       eventBatch: eventBatchForFriday(date),
     }
   })
@@ -227,20 +347,24 @@ const calendarDays = computed<CalendarDay[]>(() => {
 
 const weekCount = computed(() => calendarDays.value.length / 7)
 
-const selectedDay = computed(
-  () =>
-    calendarDays.value.find((day) => day.key === dateKey(selectedDate.value)) ?? {
-      date: selectedDate.value,
-      key: dateKey(selectedDate.value),
-      isCurrentMonth: true,
-      isToday: sameDate(selectedDate.value, new Date()),
-      isFriday: selectedDate.value.getDay() === 5,
-      payments: paymentsByDueDate.value.get(dateKey(selectedDate.value)) ?? [],
-      paymentBatch: batchesByFriday.value.get(dateKey(selectedDate.value)) ?? [],
-      events: eventsForDay(selectedDate.value),
-      eventBatch: eventBatchForFriday(selectedDate.value),
-    },
-)
+const selectedDay = computed(() => {
+  const found = calendarDays.value.find((day) => day.key === dateKey(selectedDate.value))
+  if (found) return found
+
+  const events = eventsForDay(selectedDate.value)
+  return {
+    date: selectedDate.value,
+    key: dateKey(selectedDate.value),
+    isCurrentMonth: true,
+    isToday: sameDate(selectedDate.value, new Date()),
+    isFriday: selectedDate.value.getDay() === 5,
+    payments: paymentsByDueDate.value.get(dateKey(selectedDate.value)) ?? [],
+    paymentBatch: batchesByFriday.value.get(dateKey(selectedDate.value)) ?? [],
+    events,
+    pendingEventsCount: events.filter((event) => !isEventPaid(event, selectedDate.value)).length,
+    eventBatch: eventBatchForFriday(selectedDate.value),
+  }
+})
 
 function hasConfirmedAmount(payment: Payment): boolean {
   return Boolean(payment.requestFolio) || payment.isFixed === true || payment.status === 'pagado'
@@ -492,9 +616,9 @@ async function removeEvent(event: CalendarEvent) {
               <div class="day-heading">
                 <span class="day-number">{{ day.date.getDate() }}</span>
                 <span v-if="day.isToday" class="today-label">HOY</span>
-                <span v-if="day.events.length" class="reminder-badge">
+                <span v-if="day.pendingEventsCount" class="reminder-badge">
                   <v-icon icon="mdi-bell-outline" size="11" />
-                  {{ day.events.length }}
+                  {{ day.pendingEventsCount }}
                 </span>
               </div>
 
@@ -605,7 +729,41 @@ async function removeEvent(event: CalendarEvent) {
           </div>
 
           <div v-if="selectedDay.eventBatch.length" class="panel-section reminder-preparation">
-            <p class="panel-section-title">Recordatorios por preparar este viernes</p>
+            <div class="reminder-preparation__heading">
+              <p class="panel-section-title">Recordatorios por preparar este viernes</p>
+              <v-btn
+                v-if="pendingBatchItems.length"
+                size="x-small"
+                variant="flat"
+                color="primary"
+                :loading="bulkPreparing"
+                @click="createSolicitudesForBatch"
+              >
+                Crear Solicitudes
+              </v-btn>
+            </div>
+            <v-alert
+              v-if="bulkPrepareError"
+              type="error"
+              variant="tonal"
+              density="compact"
+              closable
+              class="mb-2"
+              @click:close="bulkPrepareError = null"
+            >
+              {{ bulkPrepareError }}
+            </v-alert>
+            <v-alert
+              v-if="bulkPrepareNotice"
+              type="success"
+              variant="tonal"
+              density="compact"
+              closable
+              class="mb-2"
+              @click:close="bulkPrepareNotice = null"
+            >
+              {{ bulkPrepareNotice }}
+            </v-alert>
             <div
               v-for="item in selectedDay.eventBatch"
               :key="`event-batch-${item.event.id}`"
@@ -620,7 +778,31 @@ async function removeEvent(event: CalendarEvent) {
                 <span>Fecha del recordatorio: {{ formatShortDate(item.dueDate) }}</span>
                 <small v-if="item.event.nota">{{ item.event.nota }}</small>
               </div>
-              <v-chip color="secondary" size="x-small" variant="tonal">Preparar</v-chip>
+              <v-chip
+                v-if="isEventPaid(item.event, item.dueDate)"
+                color="secondary"
+                size="x-small"
+                variant="tonal"
+              >
+                Pagado
+              </v-chip>
+              <v-chip
+                v-else-if="preparationFor(item.event, item.dueDate)"
+                color="info"
+                size="x-small"
+                variant="tonal"
+              >
+                Preparado
+              </v-chip>
+              <v-btn
+                v-else
+                size="x-small"
+                variant="tonal"
+                color="primary"
+                @click="openPrepare(item.event, item.dueDate)"
+              >
+                Preparar
+              </v-btn>
             </div>
           </div>
 
@@ -669,7 +851,32 @@ async function removeEvent(event: CalendarEvent) {
                 </span>
                 <small>Fecha: {{ formatShortDate(selectedDay.date) }}</small>
               </div>
-              <div class="d-flex ga-1">
+              <div class="d-flex align-center ga-1">
+                <v-chip
+                  v-if="isEventPaid(event, selectedDay.date)"
+                  color="secondary"
+                  size="x-small"
+                  variant="tonal"
+                >
+                  Pagado
+                </v-chip>
+                <v-chip
+                  v-else-if="preparationFor(event, selectedDay.date)"
+                  color="info"
+                  size="x-small"
+                  variant="tonal"
+                >
+                  Preparado
+                </v-chip>
+                <v-btn
+                  v-else
+                  size="x-small"
+                  variant="tonal"
+                  color="primary"
+                  @click="openPrepare(event, selectedDay.date)"
+                >
+                  Preparar
+                </v-btn>
                 <v-btn
                   icon="mdi-pencil-outline"
                   variant="text"
@@ -727,6 +934,7 @@ async function removeEvent(event: CalendarEvent) {
     </v-card>
 
     <CalendarEventFormDialog v-model="showEventDialog" :editing-event="editingEvent" />
+    <RequestFormDialog v-model="showPrepareDialog" :calendar-prefill="preparePrefill" />
 
     
   </div>
@@ -1336,6 +1544,17 @@ async function removeEvent(event: CalendarEvent) {
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+}
+
+.reminder-preparation__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.reminder-preparation__heading .panel-section-title {
+  margin-bottom: 0;
 }
 
 .payment-row {

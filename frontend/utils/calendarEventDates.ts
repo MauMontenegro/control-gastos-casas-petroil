@@ -31,6 +31,14 @@ export function previousOrSameFriday(date: Date): Date {
   return friday
 }
 
+// Identifica una ocurrencia concreta del recordatorio para vincularla a un
+// concepto de solicitud: los mensuales se identifican por mes (una
+// preparación por mes), los únicos por su fecha exacta (solo tienen una
+// ocurrencia posible).
+export function calendarEventPeriodKey(event: CalendarEvent, date: Date): string {
+  return event.recurrencia === 'mensual' ? calendarDateKey(date).slice(0, 7) : calendarDateKey(date)
+}
+
 export function eventOccurrenceForPaymentFriday(
   event: CalendarEvent,
   friday: Date,

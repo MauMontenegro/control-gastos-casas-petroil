@@ -1,6 +1,15 @@
 <script setup lang="ts">
-import type { CreateFundRequestPayload } from '~/types'
+import type {
+  CalendarEventPrepareContext,
+  CreateFundRequestConceptItem,
+  FundRequestConceptDetail,
+} from '~/types'
 import { useOcrRepository } from '~/repositories/ocrRepository'
+import { cardOptions } from '~/utils/cardOptions'
+import { expenseTypeOptions, incrementTypeOptions, providerOptions } from '~/utils/fundRequestOptions'
+import { deriveIncrementType, roundToCajero } from '~/utils/fundRequestRules'
+
+const props = defineProps<{ calendarPrefill?: CalendarEventPrepareContext | null }>()
 
 interface ConceptRow {
   key: string
@@ -36,24 +45,6 @@ const store = useRequestsStore()
 const casasStore = useCasasStore()
 const { t } = useI18n()
 
-const expenseTypeOptions = ['Luz', 'Agua', 'Limpieza', 'Gas', 'Internet']
-const incrementTypeOptions = ['Ventanilla Bancaria', 'Cajero Automático', 'Pago en establecimiento']
-const providerOptions = [
-  'CFE',
-  'Telmex',
-  'Agua y Saneamiento',
-  'Servicios de Limpieza del Norte',
-  'Otro',
-]
-// TODO: sin catálogo de tarjetas bancarias todavía (no existe endpoint en el
-// backend). Reemplazar por un fetch real cuando exista.
-const cardOptions = [
-  'Tarjeta CFE ****1234',
-  'Tarjeta Telmex ****5678',
-  'Tarjeta General ****9012',
-  'Abastecedora - BBVA BANCOMER - 01',
-]
-
 const casaOptions = computed(() =>
   casasStore.items.map((c) => ({ title: `${c.empresa} · ${c.nombre}`, value: c.id })),
 )
@@ -82,18 +73,9 @@ function removeConcept(key: string) {
   }
 }
 
-// El "Tipo de Incremento" se deriva del tipo de gasto: Limpieza siempre se
-// paga en cajero (no hay ventanilla/establecimiento para eso), el resto en
-// establecimiento por default. El usuario puede cambiarlo a mano después.
-function deriveIncrementType(expenseType: string): string {
-  return expenseType === 'Limpieza' ? 'Cajero Automático' : 'Pago en establecimiento'
-}
-
-// En el cajero automático solo se puede retirar en múltiplos de $100 — se
-// redondea siempre hacia arriba (1353 -> 1400) para no quedar corto.
 function applyCajeroRounding(row: ConceptRow) {
   if (row.incrementType === 'Cajero Automático' && row.amount) {
-    row.amount = Math.ceil(row.amount / 100) * 100
+    row.amount = roundToCajero(row.amount)
   }
 }
 
@@ -156,7 +138,9 @@ function conceptRowError(row: ConceptRow): string | null {
   if (row.casa == null) return t('requests.modal.errors.casa')
   if (!row.provider) return t('requests.modal.errors.provider')
   if (!row.amount || Number(row.amount) <= 0) return t('requests.modal.errors.amount')
-  if (!row.document) return t('requests.modal.errors.document')
+  // Al preparar desde el calendario el documento no existe todavía — se
+  // completa después en Comprobaciones.
+  if (!props.calendarPrefill && !row.document) return t('requests.modal.errors.document')
   return null
 }
 
@@ -172,17 +156,30 @@ const conceptsValid = computed(() =>
       row.casa != null &&
       row.provider &&
       Number(row.amount) > 0 &&
-      row.document,
+      (props.calendarPrefill || row.document),
   ),
 )
 
 const submitting = ref(false)
 const submitError = ref<string | null>(null)
 
+function applyCalendarPrefill(prefill: CalendarEventPrepareContext) {
+  card.value = prefill.tarjeta
+  concepts.value = [
+    {
+      ...createConceptRow(),
+      casa: prefill.casa,
+      expenseType: prefill.expenseType,
+      incrementType: deriveIncrementType(prefill.expenseType),
+      comment: `Pago de ${prefill.expenseType}`,
+    },
+  ]
+}
+
 watch(open, (isOpen) => {
-  if (isOpen && casasStore.items.length === 0) {
-    casasStore.fetchCasas()
-  }
+  if (!isOpen) return
+  if (casasStore.items.length === 0) casasStore.fetchCasas()
+  if (props.calendarPrefill) applyCalendarPrefill(props.calendarPrefill)
 })
 
 function resetFormState() {
@@ -198,20 +195,47 @@ async function onSubmit() {
   submitting.value = true
   submitError.value = null
   try {
-    const payload: CreateFundRequestPayload = {
-      requiredDate: todayDate(),
-      card: card.value,
-      concepts: concepts.value.map((row) => ({
-        expenseType: row.expenseType,
-        incrementType: row.incrementType,
-        casa: row.casa as number,
-        provider: row.provider,
-        amount: Number(row.amount),
-        document: row.document as File,
-        comment: row.comment || undefined,
-      })),
+    const conceptItems: CreateFundRequestConceptItem[] = concepts.value.map((row) => ({
+      expenseType: row.expenseType,
+      incrementType: row.incrementType,
+      casa: row.casa as number,
+      provider: row.provider,
+      amount: Number(row.amount),
+      document: row.document,
+      comment: row.comment || undefined,
+    }))
+
+    // Las solicitudes de incremento se hacen por tarjeta: si ya hay una
+    // abierta ('en-revision') para esta misma tarjeta, los conceptos nuevos
+    // se agregan a esa en vez de crear una solicitud aparte. Se refresca
+    // justo antes para no perder una solicitud abierta en otra pestaña/sesión.
+    await store.fetchRequests()
+    const existing = store.items.find((r) => r.status === 'en-revision' && r.card === card.value)
+
+    let requestId: string
+    let addedConcepts: FundRequestConceptDetail[]
+    if (existing) {
+      const result = await store.addConcepts(existing.id, conceptItems)
+      requestId = existing.id
+      addedConcepts = result.addedConcepts
+    } else {
+      const created = await store.createRequest({
+        requiredDate: todayDate(),
+        card: card.value,
+        concepts: conceptItems,
+      })
+      requestId = created.id
+      addedConcepts = created.concepts
     }
-    await store.createRequest(payload)
+
+    if (props.calendarPrefill && addedConcepts[0]) {
+      await useCalendarEventsStore().linkPreparation(props.calendarPrefill.calendarEventId, {
+        periodKey: props.calendarPrefill.periodKey,
+        requestId,
+        conceptId: addedConcepts[0].id,
+      })
+    }
+
     resetFormState()
     open.value = false
   } catch (e) {
@@ -240,7 +264,7 @@ function handleCancel() {
             <v-icon icon="mdi-file-document-plus-outline" size="24" />
           </span>
           <div class="request-dialog-header__copy">
-            <h2>Nueva solicitud</h2>
+            <h2>{{ calendarPrefill ? 'Preparar Solicitud' : 'Nueva solicitud' }}</h2>
           </div>
           <v-btn class="request-dialog-close" icon="mdi-close" variant="text" density="comfortable" @click="handleCancel" />
         </div>
@@ -297,6 +321,7 @@ function handleCancel() {
                   </strong>
                 </div>
                 <v-btn
+                  v-if="!calendarPrefill"
                   class="add-concept-button"
                   icon="mdi-plus"
                   size="small"
@@ -315,7 +340,7 @@ function handleCancel() {
               >
                 <div class="concept-card__heading">
                   <v-btn
-                    v-if="concepts.length > 1"
+                    v-if="concepts.length > 1 && !calendarPrefill"
                     icon="mdi-close"
                     variant="text"
                     size="small"

@@ -30,6 +30,12 @@ export interface FundRequestConceptDetail {
 
 export interface UpdateFundRequestConceptPayload {
   expenseType?: string
+  incrementType?: string
+  /** Id numérico de la casa (igual que al crear el concepto), no el nombre que trae el GET. */
+  casa?: number
+  provider?: string
+  amount?: number
+  comment?: string
   grupoCentroCosto?: string
   centroCosto?: string
   deducible?: 'SI' | 'NO'
@@ -63,7 +69,8 @@ export interface CreateFundRequestConceptItem {
   casa: number
   provider: string
   amount: number
-  document: File
+  /** Opcional al preparar desde el calendario: se completa después en Comprobaciones. */
+  document: File | null
   comment?: string
 }
 
@@ -71,4 +78,9 @@ export interface CreateFundRequestPayload {
   requiredDate: string
   card: string
   concepts: CreateFundRequestConceptItem[]
+}
+
+export interface AddFundRequestConceptsResult {
+  request: FundRequest
+  addedConcepts: FundRequestConceptDetail[]
 }

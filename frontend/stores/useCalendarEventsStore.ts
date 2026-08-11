@@ -1,5 +1,10 @@
 import { useCalendarEventsRepository } from '~/repositories/calendarEventsRepository'
-import type { CalendarEvent, CreateCalendarEventPayload, UpdateCalendarEventPayload } from '~/types'
+import type {
+  CalendarEvent,
+  CreateCalendarEventPayload,
+  LinkCalendarEventPreparationPayload,
+  UpdateCalendarEventPayload,
+} from '~/types'
 
 export const useCalendarEventsStore = defineStore('calendarEvents', () => {
   const items = ref<CalendarEvent[]>([])
@@ -36,5 +41,21 @@ export const useCalendarEventsStore = defineStore('calendarEvents', () => {
     items.value = items.value.filter((e) => e.id !== id)
   }
 
-  return { items, loading, error, fetchEvents, createEvent, updateEvent, deleteEvent }
+  async function linkPreparation(id: string, payload: LinkCalendarEventPreparationPayload) {
+    const updated = await useCalendarEventsRepository().linkPreparation(id, payload)
+    const index = items.value.findIndex((e) => e.id === id)
+    if (index !== -1) items.value[index] = updated
+    return updated
+  }
+
+  return {
+    items,
+    loading,
+    error,
+    fetchEvents,
+    createEvent,
+    updateEvent,
+    deleteEvent,
+    linkPreparation,
+  }
 })

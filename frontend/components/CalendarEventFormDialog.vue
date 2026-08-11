@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { CalendarEvent, CreateCalendarEventPayload, CalendarEventRecurrence } from '~/types'
+import { cardOptions } from '~/utils/cardOptions'
 
 const props = defineProps<{ editingEvent: CalendarEvent | null }>()
 const open = defineModel<boolean>({ default: false })
@@ -12,6 +13,7 @@ const tipoPagoOptions = ['Luz', 'Agua', 'Limpieza', 'Gas', 'Internet', 'Otros']
 
 const casa = ref<number | null>(null)
 const tipoPago = ref('')
+const tarjeta = ref('')
 const recurrencia = ref<CalendarEventRecurrence>('unico')
 const fecha = ref('')
 const diaDelMes = ref<number | null>(null)
@@ -31,6 +33,7 @@ function resetForm() {
   if (props.editingEvent) {
     casa.value = props.editingEvent.casa
     tipoPago.value = props.editingEvent.tipoPago
+    tarjeta.value = props.editingEvent.tarjeta
     recurrencia.value = props.editingEvent.recurrencia
     fecha.value = props.editingEvent.fecha || ''
     diaDelMes.value = props.editingEvent.diaDelMes ?? null
@@ -38,6 +41,7 @@ function resetForm() {
   } else {
     casa.value = null
     tipoPago.value = ''
+    tarjeta.value = ''
     recurrencia.value = 'unico'
     fecha.value = ''
     diaDelMes.value = null
@@ -52,7 +56,7 @@ watch(open, (isOpen) => {
 })
 
 const isValid = computed(() => {
-  if (casa.value == null || !tipoPago.value) return false
+  if (casa.value == null || !tipoPago.value || !tarjeta.value) return false
   if (recurrencia.value === 'unico') return !!fecha.value
   return !!diaDelMes.value && diaDelMes.value >= 1 && diaDelMes.value <= 31
 })
@@ -67,6 +71,7 @@ async function onSubmit() {
     const payload: CreateCalendarEventPayload = {
       casa: casa.value as number,
       tipoPago: tipoPago.value,
+      tarjeta: tarjeta.value,
       recurrencia: recurrencia.value,
       fecha: recurrencia.value === 'unico' ? fecha.value : undefined,
       diaDelMes: recurrencia.value === 'mensual' ? (diaDelMes.value as number) : undefined,
@@ -145,6 +150,21 @@ async function onSubmit() {
               density="compact"
               hide-details="auto"
               :error-messages="submitAttempted && !tipoPago ? ['Selecciona un tipo de pago'] : []"
+            />
+          </label>
+
+          <label class="reminder-field">
+            <span>Tarjeta</span>
+            <v-select
+              v-model="tarjeta"
+              :items="cardOptions"
+              :menu-props="{ contentClass: 'reminder-select-menu' }"
+              aria-label="Tarjeta"
+              placeholder="Selecciona la tarjeta"
+              persistent-placeholder
+              density="compact"
+              hide-details="auto"
+              :error-messages="submitAttempted && !tarjeta ? ['Selecciona una tarjeta'] : []"
             />
           </label>
 

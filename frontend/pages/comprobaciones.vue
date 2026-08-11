@@ -6,6 +6,8 @@ import type {
   TipoNegocio,
   UpdateFundRequestConceptPayload,
 } from '~/types'
+import { expenseTypeOptions } from '~/utils/fundRequestOptions'
+import { cardOptions } from '~/utils/cardOptions'
 
 interface ComprobacionEntry {
   request: FundRequest
@@ -16,11 +18,6 @@ interface ComprobacionEntry {
 const requestsStore = useRequestsStore()
 const casasStore = useCasasStore()
 const config = useRuntimeConfig()
-
-// Mismo catálogo usado al capturar la solicitud (RequestFormDialog.vue). El
-// diccionario concepto -> catálogo real de SIPP para un servicio específico
-// llega después; por ahora el usuario puede corregirlo aquí a mano.
-const expenseTypeOptions = ['Luz', 'Agua', 'Limpieza', 'Gas', 'Internet']
 
 const tipoNegocioOptions: TipoNegocio[] = [
   'Distribuidora',
@@ -135,6 +132,27 @@ async function saveConcept(entry: ComprobacionEntry, payload: UpdateFundRequestC
       fetchError.data?.message || fetchError.message || 'No se pudo guardar el cambio.'
   } finally {
     savingId.value = null
+  }
+}
+
+const savingRequestId = ref<string | null>(null)
+
+// La tarjeta vive en la solicitud, no en el concepto — como varios conceptos
+// de esta pantalla pueden compartir la misma solicitud (misma `entry.request`
+// por referencia), cambiarla aquí se refleja de una vez en todas sus tarjetas.
+async function saveCard(entry: ComprobacionEntry, card: string) {
+  entry.request.card = card
+  savingRequestId.value = entry.request.id
+  saveError.value = null
+  try {
+    await requestsStore.updateCard(entry.request.id, card)
+  } catch (e) {
+    console.error('Error al guardar la tarjeta:', e)
+    const fetchError = e as { data?: { message?: string }; message?: string }
+    saveError.value =
+      fetchError.data?.message || fetchError.message || 'No se pudo guardar la tarjeta.'
+  } finally {
+    savingRequestId.value = null
   }
 }
 
@@ -282,6 +300,16 @@ async function sendToSipp(entry: ComprobacionEntry) {
             <span class="comprobacion-folio">
               Solicitud {{ entry.request.sippFolio || entry.request.folio }}
             </span>
+            <v-select
+              :model-value="entry.request.card"
+              :items="cardOptions"
+              :loading="savingRequestId === entry.request.id"
+              density="compact"
+              hide-details
+              prepend-inner-icon="mdi-credit-card-outline"
+              class="comprobacion-card__tarjeta-select"
+              @update:model-value="(v) => saveCard(entry, v)"
+            />
             <v-chip
               size="small"
               variant="tonal"
@@ -686,6 +714,32 @@ async function sendToSipp(entry: ComprobacionEntry) {
   color: #0877a8;
   font-size: 0.68rem;
   font-weight: 700;
+}
+
+.comprobacion-card__tarjeta-select {
+  max-width: 230px;
+}
+
+.comprobacion-card__tarjeta-select :deep(.v-field) {
+  min-height: 32px;
+  border-radius: 99px;
+  background: #eaf5fa;
+  box-shadow: none;
+}
+
+.comprobacion-card__tarjeta-select :deep(.v-field__input) {
+  min-height: 32px;
+  padding-top: 0;
+  padding-bottom: 0;
+  color: #0877a8;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.comprobacion-card__tarjeta-select :deep(.v-field__prepend-inner) {
+  padding-top: 0;
+  align-items: center;
+  color: #0877a8;
 }
 
 .comprobacion-card__sipp-button {
