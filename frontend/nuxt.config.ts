@@ -10,6 +10,15 @@ export default defineNuxtConfig({
   compatibilityDate: '2026-07-27',
   experimental: { appManifest: false },
 
+  app: {
+    pageTransition: { name: 'page', mode: 'out-in' },
+    head: {
+      title: 'Control de Gastos | Petroil',
+      htmlAttrs: { lang: 'es' },
+      link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
+    },
+  },
+
   modules: [
     '@nuxt/eslint',
     '@pinia/nuxt',

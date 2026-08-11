@@ -1,1 +1,13 @@
-pnpm --filter frontend lint && pnpm --filter frontend typecheck
+#!/usr/bin/env sh
+
+if command -v pnpm >/dev/null 2>&1; then
+  PNPM="pnpm"
+elif [ -f "./.tools/node-v22.23.1-win-x64/pnpm.CMD" ]; then
+  export PATH="$(pwd)/.tools/node-v22.23.1-win-x64:$PATH"
+  PNPM="./.tools/node-v22.23.1-win-x64/pnpm.CMD"
+else
+  echo "pnpm no está disponible. Instala pnpm 11.17.0 o prepara Node en .tools/."
+  exit 127
+fi
+
+"$PNPM" --filter frontend lint && "$PNPM" --filter frontend typecheck

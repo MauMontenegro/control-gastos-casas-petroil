@@ -7,7 +7,8 @@
     "limpieza": "Limpieza",
     "comprobaciones": "Comprobaciones",
     "reportes": "Dashboards",
-    "sucursales": "Sucursales"
+    "sucursales": "Casas Petroil",
+    "configuracionRpa": "Configuración RPA"
   },
   "common": {
     "loading": "Cargando...",
@@ -34,28 +35,32 @@
       "title": "Nueva solicitud de fondos",
       "subtitle": "Captura la información principal. El folio se asignará automáticamente.",
       "fields": {
-        "concept": "Concepto de la solicitud",
-        "conceptPlaceholder": "Selecciona un concepto...",
-        "amount": "Importe estimado",
-        "requiredDate": "Fecha requerida",
-        "branch": "Sucursal",
+        "concepts": "Conceptos",
+        "amount": "Importe",
+        "casa": "Casa Petroil",
+        "card": "Tarjeta bancaria",
+        "cardPlaceholder": "Selecciona una tarjeta...",
         "expenseType": "Tipo de gasto",
-        "costCenter": "Centro de costo",
-        "costCenterPlaceholder": "Selecciona...",
-        "provider": "Proveedor o beneficiario",
+        "incrementType": "Tipo de Incremento",
+        "provider": "Proveedor",
         "providerPlaceholder": "Selecciona un proveedor...",
-        "comment": "Comentario",
-        "commentPlaceholder": "Escribe un comentario..."
+        "document": "Documento",
+        "comment": "Motivo de Incremento",
+        "commentPlaceholder": "Escribe el motivo del incremento..."
       },
       "errors": {
-        "concept": "Selecciona un concepto",
         "amount": "Ingresa un importe válido",
-        "requiredDate": "Selecciona una fecha",
-        "branch": "Selecciona una sucursal",
+        "document": "Adjunta el documento soporte",
+        "casa": "Selecciona una casa Petroil",
+        "card": "Selecciona una tarjeta bancaria",
         "expenseType": "Selecciona un tipo de gasto",
-        "costCenter": "Selecciona un centro de costo",
+        "incrementType": "Selecciona un tipo de incremento",
         "provider": "Selecciona un proveedor"
       },
+      "conceptLabel": "Concepto {n}",
+      "addConcept": "Agregar concepto",
+      "total": "Total",
+      "submitError": "No se pudo crear la solicitud. Intenta de nuevo.",
       "cancel": "Cancelar",
       "submit": "Crear solicitud"
     }

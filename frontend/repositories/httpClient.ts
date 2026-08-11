@@ -4,24 +4,29 @@
  * Inyecta el token de Auth0 y la base URL del backend (aún no existe;
  * los repositorios lo usarán en cuanto haya endpoints reales).
  */
-import { useAuth0 } from '@auth0/auth0-vue'
-
 export function useHttpClient() {
   const config = useRuntimeConfig()
 
   async function request<T>(path: string, options: Record<string, unknown> = {}): Promise<T> {
-    const { getAccessTokenSilently, isAuthenticated } = useAuth0()
+    // useAuth0() usa inject() de Vue y solo funciona dentro de setup().
+    // $auth0 (expuesto por plugins/auth0.client.ts vía nuxtApp.provide) es el
+    // mismo cliente pero accesible desde cualquier contexto, incluyendo
+    // watch() callbacks disparados fuera de setup().
+    const { getAccessTokenSilently, isAuthenticated } = useNuxtApp().$auth0
     const headers: Record<string, string> = { ...(options.headers as Record<string, string>) }
 
     if (isAuthenticated.value) {
       headers.Authorization = `Bearer ${await getAccessTokenSilently()}`
     }
 
-    return $fetch<T>(path, {
+    // $fetch(path) sin cast: al existir rutas tipadas en server/api/, TS
+    // infiere el retorno contra esas rutas conocidas en vez de contra `T`
+    // cuando `path` es un string genérico (bug conocido de ofetch/Nitro).
+    return $fetch(path, {
       baseURL: config.public.apiBaseUrl as string,
       ...options,
       headers,
-    })
+    }) as Promise<T>
   }
 
   return { request }
