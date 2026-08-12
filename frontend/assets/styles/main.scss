@@ -119,16 +119,16 @@
 .v-overlay__content > .v-list,
 .v-overlay-container .v-select__content {
   overflow: hidden !important;
-  border: 1px solid #4c9cbe !important;
+  border: 1px solid #b5d5e3 !important;
   border-radius: 14px !important;
-  background: #afd5e5 !important;
+  background: #f2f8fb !important;
   box-shadow: 0 14px 30px rgba(7, 70, 112, 0.18) !important;
 }
 
 .v-overlay__content > .v-list,
 .v-select__content > .v-list {
   padding: 7px !important;
-  background: #afd5e5 !important;
+  background: #f2f8fb !important;
 }
 
 .v-overlay__content > .v-list .v-list-item,
@@ -141,12 +141,12 @@
 
 .v-overlay__content > .v-list .v-list-item:hover,
 .v-select__content .v-list-item:hover {
-  background: #91c9df !important;
+  background: #e1f0f6 !important;
 }
 
 .v-overlay__content > .v-list .v-list-item--active,
 .v-select__content .v-list-item--active {
-  background: #78bbd6 !important;
+  background: #cce7f1 !important;
   color: #075f99 !important;
   font-weight: 700;
 }

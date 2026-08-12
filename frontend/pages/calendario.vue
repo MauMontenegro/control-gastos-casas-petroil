@@ -1874,9 +1874,9 @@ async function removeEvent(event: CalendarEvent) {
 }
 :global(.calendar-filter-menu) {
   overflow: hidden;
-  border: 1px solid #8fc5d9;
+  border: 1px solid #b5d5e3;
   border-radius: 14px !important;
-  background: #edf7fa !important;
+  background: #f2f8fb !important;
   box-shadow: 0 14px 30px rgb(7 70 112 / 18%) !important;
 }
 
@@ -1905,7 +1905,7 @@ async function removeEvent(event: CalendarEvent) {
 
 :global(.calendar-filter-menu .v-list) {
   padding: 7px;
-  background: #edf7fa !important;
+  background: #f2f8fb !important;
 }
 
 :global(.calendar-filter-menu .v-list-item) {
@@ -1917,11 +1917,11 @@ async function removeEvent(event: CalendarEvent) {
 }
 
 :global(.calendar-filter-menu .v-list-item:hover) {
-  background: #d8edf5 !important;
+  background: #e1f0f6 !important;
 }
 
 :global(.calendar-filter-menu .v-list-item--active) {
-  background: #c2e2ef !important;
+  background: #cce7f1 !important;
   color: #075f99 !important;
   font-weight: 700;
 }

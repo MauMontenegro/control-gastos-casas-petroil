@@ -716,15 +716,15 @@ async function uploadSelectedToSipp() {
 
 :global(.requests-filter-menu) {
   overflow: hidden;
-  border: 1px solid #69a9c4;
+  border: 1px solid #b5d5e3;
   border-radius: 14px !important;
-  background: #c7e4ef !important;
+  background: #f2f8fb !important;
   box-shadow: 0 14px 28px rgb(7 70 112 / 18%) !important;
 }
 
 :global(.requests-filter-menu .v-list) {
   padding: 7px;
-  background: #c7e4ef !important;
+  background: #f2f8fb !important;
 }
 
 :global(.requests-filter-menu .v-list-item) {
@@ -736,11 +736,11 @@ async function uploadSelectedToSipp() {
 }
 
 :global(.requests-filter-menu .v-list-item:hover) {
-  background: #a9d5e6 !important;
+  background: #e1f0f6 !important;
 }
 
 :global(.requests-filter-menu .v-list-item--active) {
-  background: #82bfd8 !important;
+  background: #cce7f1 !important;
   color: #075f99 !important;
   font-weight: 700;
 }

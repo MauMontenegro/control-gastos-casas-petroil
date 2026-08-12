@@ -813,15 +813,15 @@ function handleCancel() {
 
 :global(.request-select-menu) {
   overflow: hidden;
-  border: 1px solid #4c9cbe;
+  border: 1px solid #b5d5e3;
   border-radius: 14px !important;
-  background: #b9ddea !important;
+  background: #f2f8fb !important;
   box-shadow: 0 14px 30px rgb(7 70 112 / 18%) !important;
 }
 
 :global(.request-select-menu .v-list) {
   padding: 7px;
-  background: linear-gradient(145deg, #d1eaf4, #afd5e5) !important;
+  background: #f2f8fb !important;
 }
 
 :global(.request-select-menu .v-list-item) {
@@ -834,13 +834,13 @@ function handleCancel() {
 }
 
 :global(.request-select-menu .v-list-item:hover) {
-  background: #91c9df !important;
+  background: #e1f0f6 !important;
   color: #075f99;
   transform: translateX(2px);
 }
 
 :global(.request-select-menu .v-list-item--active) {
-  background: #78bbd6 !important;
+  background: #cce7f1 !important;
   color: #075f99 !important;
   font-weight: 700;
 }
