@@ -11,23 +11,12 @@ onMounted(() => {
 })
 
 const headers = [
-  { title: 'Folio', key: 'folio' },
-  { title: 'Fecha de Solicitud', key: 'requiredDate' },
-  { title: 'Concepto', key: 'concept', sortable: false },
-  { title: 'Casa Petroil', key: 'casa', sortable: false },
-  { title: 'Total', key: 'total' },
-  { title: 'Estado', key: 'status' },
-  { title: 'SIPP', key: 'sippStatus', sortable: false },
+  { title: 'Folio', key: 'folio', width: '22%' },
+  { title: 'Fecha de Solicitud', key: 'requiredDate', width: '21%' },
+  { title: 'Total', key: 'total', width: '16%' },
+  { title: 'Estado', key: 'status', width: '21%' },
+  { title: 'SIPP', key: 'sippStatus', sortable: false, width: '20%' },
 ]
-
-// Una solicitud puede tener varios conceptos, cada uno con su propia
-// casa/tipo de gasto. La tabla es una fila por solicitud, así que
-// mostramos el primer valor + un indicador "+N" si hay más de uno distinto.
-function summarizeConcepts(item: FundRequest, field: 'expenseType' | 'casa'): string {
-  if (!item.concepts.length) return '—'
-  const values = [...new Set(item.concepts.map((c) => c[field]))]
-  return values.length > 1 ? `${values[0]} +${values.length - 1}` : values[0]
-}
 
 const statusColor: Record<FundRequestStatus, string> = {
   'en-revision': 'info',
@@ -260,12 +249,6 @@ async function uploadSelectedToSipp() {
       >
         <template #item.folio="{ item }">
           {{ item.sippFolio || item.folio }}
-        </template>
-        <template #item.concept="{ item }">
-          {{ summarizeConcepts(item, 'expenseType') }}
-        </template>
-        <template #item.casa="{ item }">
-          {{ summarizeConcepts(item, 'casa') }}
         </template>
         <template #item.total="{ item }">
           <strong>{{ formatCurrency(item.total) }}</strong>
