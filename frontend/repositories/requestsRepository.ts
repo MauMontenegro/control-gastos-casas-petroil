@@ -36,7 +36,45 @@ function appendConceptsToFormData(body: FormData, concepts: CreateFundRequestCon
 
 export function useRequestsRepository() {
   async function getRequests(): Promise<FundRequest[]> {
-    return useHttpClient().request<FundRequest[]>('/fund-requests')
+    const response = await useHttpClient().request<Array<FundRequest | Record<string, unknown>>>(
+      '/fund-requests',
+    )
+    return response.map((item) => {
+      if (Array.isArray((item as FundRequest).concepts)) return item as FundRequest
+      const legacy = item as Record<string, unknown>
+      const status = String(legacy.status)
+      const requestId = String(legacy.id)
+      const amount = Number(legacy.total ?? 0)
+      return {
+        id: requestId,
+        folio: String(legacy.folio ?? ''),
+        requiredDate: String(legacy.requiredDate ?? ''),
+        card: String(legacy.sippCardName ?? legacy.sippCardId ?? ''),
+        total: amount,
+        status:
+          status === 'capturada'
+            ? 'autorizada'
+            : status === 'correccion'
+              ? 'correccion'
+              : 'en-revision',
+        sippStatus: status === 'capturada' ? 'enviada' : status === 'capturando' ? 'en-proceso' : 'no-enviada',
+        sippFolio: legacy.sippFolio ? String(legacy.sippFolio) : undefined,
+        concepts: [
+          {
+            id: `${requestId}-concept`,
+            expenseType: String(legacy.expenseType ?? legacy.concept ?? 'Sin categoría'),
+            incrementType: String(legacy.incrementType ?? ''),
+            casa: String(legacy.branch ?? 'Sin casa'),
+            provider: String(legacy.provider ?? 'Sin proveedor'),
+            amount,
+            comment: legacy.comment ? String(legacy.comment) : undefined,
+            documentName: String(legacy.supportName ?? ''),
+            documentUrl: '',
+            comprobacionStatus: status === 'capturada' ? 'enviada' : 'pendiente',
+          },
+        ],
+      } satisfies FundRequest
+    })
   }
 
   async function uploadToSipp(ids: string[]): Promise<SippUploadResult[]> {
