@@ -12,6 +12,7 @@ import type {
 export const useRequestsStore = defineStore('requests', () => {
   const items = ref<FundRequest[]>([])
   const loading = ref(false)
+  const loaded = ref(false)
   const error = ref<string | null>(null)
 
   const pending = computed(() => items.value.filter((r) => r.status === 'en-revision'))
@@ -39,6 +40,7 @@ export const useRequestsStore = defineStore('requests', () => {
       error.value = e instanceof Error ? e.message : 'Error al cargar solicitudes'
     } finally {
       loading.value = false
+      loaded.value = true
     }
   }
 
@@ -106,6 +108,7 @@ export const useRequestsStore = defineStore('requests', () => {
   return {
     items,
     loading,
+    loaded,
     error,
     pending,
     approved,
