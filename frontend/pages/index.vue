@@ -466,11 +466,12 @@ async function exportDashboard() {
 
 <template>
   <section class="executive-dashboard">
-    <header class="hero">
+    <header class="hero petroil-page-heading">
       <div>
-        <span class="eyebrow">Centro de control financiero</span>
-        <h1>Panorama ejecutivo</h1>
-        <p>Decisiones claras, gastos bajo control y prioridades en un solo lugar.</p>
+        <h1 class="text-h4 font-weight-bold mb-1">Panorama ejecutivo</h1>
+        <p class="text-body-2 text-medium-emphasis">
+          Decisiones claras, gastos bajo control y prioridades en un solo lugar.
+        </p>
       </div>
       <div class="hero__status"><i /> {{ usingDemoData ? 'Demostración con casas reales' : 'Datos actualizados' }}</div>
     </header>
@@ -2724,5 +2725,23 @@ async function exportDashboard() {
   border: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
+}
+
+/* Encabezado alineado con el patrón tipográfico del resto de las páginas. */
+.hero .eyebrow {
+  margin-top: 0;
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+.hero h1 {
+  margin-top: 0;
+  font-size: clamp(1.28rem, 1.8vw, 1.6rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+.hero p:not(.eyebrow) {
+  margin-top: 0;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
 }
 </style>

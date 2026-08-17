@@ -431,7 +431,6 @@ async function sendToSipp(entry: ComprobacionEntry) {
   <section class="comprobaciones-page">
     <header class="comprobaciones-heading">
       <div>
-        <p>SOLICITUDES APROBADAS</p>
         <h1>Comprobaciones</h1>
         <span>
           Conceptos de solicitudes aprobadas, listos para capturarse como gasto por casa/empresa.

@@ -9,8 +9,14 @@ frontend/.nuxt/
 frontend/.output/
 frontend/.data/
 frontend/dist/
+backend/dist/
 **/.nuxt/
 **/.output/
+
+# Runtime data and uploads
+data/
+backend/data/
+backend/uploads/
 
 # Env
 .env

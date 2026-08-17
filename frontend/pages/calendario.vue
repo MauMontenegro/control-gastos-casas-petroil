@@ -485,15 +485,22 @@ async function removeEvent(event: CalendarEvent) {
       </div>
       <div class="d-flex ga-2">
         <v-btn
+          class="today-button"
+          prepend-icon="mdi-calendar-today"
+          variant="flat"
+          size="small"
+          @click="goToToday"
+        >
+          Ir a hoy
+        </v-btn>
+        <v-btn
           class="new-reminder-button"
           variant="flat"
-          prepend-icon="mdi-bell-plus-outline"
+          prepend-icon="mdi-plus"
+          size="small"
           @click="openNewEvent"
         >
           Nuevo recordatorio
-        </v-btn>
-        <v-btn color="primary" prepend-icon="mdi-calendar-today" variant="flat" @click="goToToday">
-          Ir a hoy
         </v-btn>
       </div>
       </header>
@@ -1006,22 +1013,21 @@ async function removeEvent(event: CalendarEvent) {
 }
 
 .today-button {
-  min-height: 36px;
-  padding-inline: 17px !important;
-  border-radius: 8px !important;
-  background: linear-gradient(135deg, #ff8a2b, #f36b1b) !important;
-  box-shadow: 0 5px 12px rgb(243 107 27 / 22%);
+  min-height: 42px;
+  padding-inline: 15px !important;
+  border: 1px solid #075487;
+  border-radius: 10px !important;
+  background: #075f99 !important;
+  box-shadow: 0 7px 16px rgb(7 95 153 / 28%) !important;
   color: #fff !important;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  text-transform: none;
-  transition: transform 0.16s ease, box-shadow 0.16s ease;
+  letter-spacing: 0.02em;
+  transition: transform 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease;
 }
 
 .today-button:hover {
+  background: #064f80 !important;
+  box-shadow: 0 10px 22px rgb(7 95 153 / 34%) !important;
   transform: translateY(-1px);
-  box-shadow: 0 8px 17px rgb(243 107 27 / 28%);
 }
 
 .calendar-shell {
@@ -1882,20 +1888,19 @@ async function removeEvent(event: CalendarEvent) {
 
 .new-reminder-button {
   min-height: 42px;
-  padding-inline: 18px !important;
-  border: 1px solid #064f80;
-  border-radius: 11px !important;
-  background: #075f99 !important;
-  box-shadow: 0 8px 18px rgb(7 71 112 / 25%);
+  padding-inline: 15px !important;
+  border: 1px solid #ed6a17;
+  border-radius: 10px !important;
+  background: #ff791f !important;
+  box-shadow: 0 7px 16px rgb(243 107 27 / 28%) !important;
   color: #fff !important;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   transition: transform 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease;
 }
 
 .new-reminder-button:hover {
-  background: #064f80 !important;
-  box-shadow: 0 11px 23px rgb(7 71 112 / 32%);
+  background: #e96818 !important;
+  box-shadow: 0 10px 22px rgb(243 107 27 / 34%) !important;
   transform: translateY(-1px);
 }
 

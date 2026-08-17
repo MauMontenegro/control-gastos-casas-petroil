@@ -47,7 +47,7 @@ onMounted(() => {
 
 <template>
   <div>
-    <div class="mb-6">
+    <div class="petroil-page-heading mb-6">
       <p class="text-caption font-weight-bold text-secondary text-uppercase mb-1">SCAFFOLD</p>
       <h1 class="text-h4 font-weight-bold mb-1">Página de ejemplo del stack</h1>
       <p class="text-body-2 text-medium-emphasis">

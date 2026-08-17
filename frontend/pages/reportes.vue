@@ -45,7 +45,7 @@ const branchBudgetChart = computed(() => ({
 
 <template>
   <div>
-    <div class="mb-6">
+    <div class="petroil-page-heading mb-6">
       <p class="text-caption font-weight-bold text-secondary text-uppercase mb-1">
         INTELIGENCIA OPERATIVA
       </p>
