@@ -217,3 +217,31 @@
     border-color: $brand-red;
   }
 }
+
+// Encabezado institucional compartido: replica el patrón de Casas Petroil.
+.petroil-page-heading {
+  position: relative;
+  min-height: 48px;
+  padding-left: 18px;
+
+  &::before {
+    position: absolute;
+    top: 2px;
+    bottom: 2px;
+    left: 0;
+    width: 5px;
+    border-radius: 99px;
+    background: linear-gradient(180deg, #ff963e, #ff6f1a);
+    box-shadow: 0 3px 9px rgb(255 111 26 / 22%);
+    content: '';
+  }
+
+  h1 {
+    margin-top: 0;
+    color: #123c56;
+    font-size: clamp(1.28rem, 1.8vw, 1.6rem) !important;
+    font-weight: 600 !important;
+    letter-spacing: -0.02em !important;
+    line-height: 1.2 !important;
+  }
+}

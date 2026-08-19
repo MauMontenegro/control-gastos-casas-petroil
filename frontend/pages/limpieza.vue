@@ -146,38 +146,45 @@ async function copiarResumen() {
 
 <template>
   <div>
-    <div class="page-intro d-flex justify-space-between align-end flex-wrap ga-3 mb-4">
+    <div
+      class="page-intro petroil-page-heading d-flex justify-space-between align-end flex-wrap ga-3 mb-4"
+    >
       <div>
-        <p class="text-caption font-weight-bold text-secondary text-uppercase mb-1">
-          SERVICIO RECURRENTE
-        </p>
-        <h1 class="text-h4 font-weight-bold mb-0">Limpieza</h1>
+        <h1 class="text-h4 font-weight-bold mb-1">Limpieza</h1>
         <p class="text-body-2 text-medium-emphasis">
           Marca los días trabajados de cada semana y obtén el monto a transferir, sin cuentas
           manuales.
         </p>
       </div>
-      <div class="d-flex ga-2">
+      <div class="page-actions">
+        <div class="summary-actions" aria-label="Acciones de resumen">
+          <v-btn
+            class="summary-button"
+            variant="flat"
+            prepend-icon="mdi-content-copy"
+            size="small"
+            @click="copiarResumen"
+          >
+            Copiar
+          </v-btn>
+          <v-btn
+            class="summary-button summary-button--pdf"
+            variant="flat"
+            prepend-icon="mdi-file-pdf-box"
+            size="small"
+            :disabled="!store.items.length"
+            @click="descargarPdf"
+          >
+            Descargar PDF
+          </v-btn>
+        </div>
         <v-btn
-          class="pdf-button"
-          variant="tonal"
-          color="secondary"
-          prepend-icon="mdi-file-pdf-box"
+          class="new-assignment-button"
+          color="primary"
+          prepend-icon="mdi-plus"
           size="small"
-          :disabled="!store.items.length"
-          @click="descargarPdf"
+          @click="openNewAsignacion"
         >
-          PDF
-        </v-btn>
-        <v-btn
-          variant="outlined"
-          color="secondary"
-          prepend-icon="mdi-content-copy"
-          @click="copiarResumen"
-        >
-          Copiar resumen
-        </v-btn>
-        <v-btn color="primary" prepend-icon="mdi-plus" @click="openNewAsignacion">
           Nueva asignación
         </v-btn>
       </div>
@@ -402,7 +409,13 @@ async function copiarResumen() {
 
 <style scoped>
 .page-intro :deep(.v-btn) { min-height: 34px; }
-.pdf-button { min-width: 78px; }
+.page-actions { display: flex; align-items: stretch; gap: 10px; }
+.summary-actions { display: flex; align-items: center; gap: 10px; }
+.summary-button { min-height: 42px !important; padding-inline: 15px !important; border: 1px solid #bdd5e2; border-radius: 10px !important; background: #f8fcfd !important; box-shadow: 0 6px 14px rgb(18 76 106 / 16%) !important; color: #075f99 !important; letter-spacing: .02em; transition: transform .16s ease, box-shadow .16s ease, background-color .16s ease; }
+.summary-button:hover { background: #fff !important; box-shadow: 0 9px 20px rgb(18 76 106 / 22%) !important; transform: translateY(-1px); }
+.summary-button--pdf { border-color: #075487 !important; background: #075f99 !important; box-shadow: 0 7px 16px rgb(7 95 153 / 28%) !important; color: #fff !important; }
+.summary-button--pdf:hover { background: #064f80 !important; box-shadow: 0 10px 22px rgb(7 95 153 / 34%) !important; }
+.new-assignment-button { align-self: center; min-height: 42px !important; padding-inline: 18px !important; }
 .page-intro .text-body-2 { margin-top: 2px; font-size: .76rem !important; }
 .cleaning-table-card {
   overflow: hidden;
@@ -484,6 +497,10 @@ async function copiarResumen() {
 .weekly-total span { color: #526f83; font-size: .72rem; }
 .weekly-total strong { padding: 7px 12px; border-radius: 9px; background: #075f99; box-shadow: 0 5px 12px rgb(7 95 153 / 16%); color: #fff; font-size: .9rem; }
 @media (max-width: 700px) {
+  .page-actions { width: 100%; align-items: stretch; flex-direction: column; }
+  .summary-actions { display: grid; grid-template-columns: 1fr 1fr; }
+  .summary-button { width: 100%; }
+  .new-assignment-button { width: 100%; }
   .table-heading { align-items: flex-start; flex-direction: column; }
   .week-status { align-self: flex-start; }
   .table-summary { align-items: stretch; flex-direction: column; }
